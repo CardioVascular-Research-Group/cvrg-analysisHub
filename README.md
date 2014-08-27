@@ -23,6 +23,6 @@ With these classes you will execute, the algorithms bellow, and produce the outp
 
 ## Dependencies
 
-commons-lang.jar
-log4j.jar
-jdom-1.1.jar
+* commons-lang.jar
+* log4j.jar
+* jdom-1.1.jar

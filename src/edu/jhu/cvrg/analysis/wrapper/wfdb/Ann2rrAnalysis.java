@@ -1,9 +1,12 @@
 package edu.jhu.cvrg.analysis.wrapper.wfdb;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.jhu.cvrg.analysis.util.AnalysisParameterException;
 import edu.jhu.cvrg.analysis.util.AnalysisUtils;
+import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.vo.AnalysisResultType;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
 import edu.jhu.cvrg.analysis.wrapper.AnnotationBasedAnalysisWrapper;
@@ -30,7 +33,7 @@ public class Ann2rrAnalysis extends AnnotationBasedAnalysisWrapper {
 	private String outputFilename;
 	private String record; 
 	
-	public Ann2rrAnalysis(AnalysisVO vo) {
+	public Ann2rrAnalysis(AnalysisVO vo) throws AnalysisParameterException, AnalysisExecutionException {
 		super(vo);
 	}
 
@@ -39,15 +42,14 @@ public class Ann2rrAnalysis extends AnnotationBasedAnalysisWrapper {
 	}
 
 	@Override
-	public void defineInputParameters() {
-		try {
-			//*** The analysis algorithm should return a String array containing the full path/names of the result files.
+	protected void _defineInputParameters() throws AnalysisParameterException {
+		
+		if(this.getAnalysisVO().getCommandParamMap() != null && !this.getAnalysisVO().getCommandParamMap().isEmpty()){
 			intervalFormat		= (String) this.getAnalysisVO().getCommandParamMap().get("i"); // -i
 			mneumonicsEnd		= (String) this.getAnalysisVO().getCommandParamMap().get("p"); // -p
 			mneumonicsBegin		= (String) this.getAnalysisVO().getCommandParamMap().get("P"); // -P
 			initialTimesFormat	= (String) this.getAnalysisVO().getCommandParamMap().get("v"); // -v
 			finalTimesFormat	= (String) this.getAnalysisVO().getCommandParamMap().get("V"); // -V
-			
 			
 			if(this.getAnalysisVO().getCommandParamMap().get("f") != null){
 				startTime = Integer.parseInt( (String) this.getAnalysisVO().getCommandParamMap().get("f"));    // -f
@@ -61,30 +63,26 @@ public class Ann2rrAnalysis extends AnnotationBasedAnalysisWrapper {
 			consecutive			= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("c")); // -c Print intervals between consecutive valid annotations only
 			finalAnnotations	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("w")); // -w
 			initialAnnotations	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("W")); // -W
-			
-			String annotationFileName = AnalysisUtils.findPathNameExt(this.getAnalysisVO().getFileNames(), ".atr.qrs");
-			annotator = annotationFileName.substring(annotationFileName.lastIndexOf('.')+1);
-			
-			//**********************************************************************
-			path = AnalysisUtils.extractPath(this.getAnalysisVO().getFileNames().get(0));
-			inputFilename = AnalysisUtils.extractName(this.getAnalysisVO().getFileNames().get(0));
-			
-			int iIndexPeriod = inputFilename.lastIndexOf(".");
-			record = inputFilename.substring(0, iIndexPeriod);
-			
-			outputFilename = record + '_' + this.getAnalysisVO().getJobIdNumber();
-			
-			debugPrintln("- sInputPath: " + path);
-			debugPrintln("- sInputName: " + inputFilename);
-			
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			this.getAnalysisVO().setErrorMessage(e.getMessage());
-		}		
+		}
+		
+		String annotationFileName = AnalysisUtils.findPathNameExt(this.getAnalysisVO().getFileNames(), ".atr.qrs");
+		annotator = annotationFileName.substring(annotationFileName.lastIndexOf('.')+1);
+		
+		//**********************************************************************
+		path = AnalysisUtils.extractPath(this.getAnalysisVO().getFileNames().get(0));
+		inputFilename = AnalysisUtils.extractName(this.getAnalysisVO().getFileNames().get(0));
+		
+		int indexPeriod = inputFilename.lastIndexOf(".");
+		record = inputFilename.substring(0, indexPeriod);
+		
+		outputFilename = record + '_' + this.getAnalysisVO().getJobIdNumber();
+		
+		debugPrintln("- path: " + path);
+		debugPrintln("- inputFilename: " + inputFilename);
 	}
 
 	@Override
-	public void execute() {
+	protected void _execute() throws AnalysisExecutionException {
 		boolean bRet = true;
 		debugPrintln("ann2rr()");
 		debugPrintln("- sInputFile:" + inputFilename);
@@ -102,92 +100,88 @@ public class Ann2rrAnalysis extends AnnotationBasedAnalysisWrapper {
 		debugPrintln("- bInitialAnnotations:" + initialAnnotations);
 		debugPrintln("- sOutputName:" + outputFilename);
 
+		String[] envVar = new String[0];  
+
+		// build command string
+		String command = "ann2rr -r " + path + record ; // record name
+		
+		command += " -a " + annotator;
+		
+		if (allIntervals) {
+			command += " -A"; // Print all intervals between annotations. This option overrides the -c and -p options. 
+		} else {
+			if (consecutive) {
+				command += " -c"; // Print intervals between consecutive valid annotations only.
+			}
+
+			if (mneumonicsEnd != null) {
+				command += " -p " + mneumonicsEnd;
+			}
+		}
+
+		if(startTime > 0) command += " -f " + startTime;
+
+		if(intervalFormat != null && !intervalFormat.equals("")){
+			command += " -i " + intervalFormat;
+		}
+
+		if(mneumonicsBegin != null &&  !mneumonicsBegin.equals("")){
+			command += " -P " + mneumonicsBegin;
+		}
+
+		if(endTime > 0){ 
+			command += " -t " + endTime;
+		}
+
+		if(finalTimesFormat != null && !finalTimesFormat.equals("")){
+			command += " -v " + finalTimesFormat;
+		}
+
+		if(initialTimesFormat != null && !initialTimesFormat.equals("")){
+			command += " -V " + initialTimesFormat;
+		}
+
+		if(finalAnnotations){
+			command += " -w";
+		}
+
+		if(initialAnnotations){
+			command += " -W";
+		}
+
 		try {
-
-			String[] envVar = new String[0];  
-
-			// build command string
-			String command = "ann2rr -r " + path + record ; // record name
 			
-			command += " -a " + annotator;
-			
-			if (allIntervals) {
-				command += " -A"; // Print all intervals between annotations. This option overrides the -c and -p options. 
-			} else {
-				if (consecutive) {
-					command += " -c"; // Print intervals between consecutive valid annotations only.
-				}
-
-				if (mneumonicsEnd != null) {
-					command += " -p " + mneumonicsEnd;
-				}
-			}
-
-			if(startTime > 0) command += " -f " + startTime;
-
-			if(intervalFormat != null && !intervalFormat.equals("")){
-				command += " -i " + intervalFormat;
-			}
-
-			if(mneumonicsBegin != null &&  !mneumonicsBegin.equals("")){
-				command += " -P " + mneumonicsBegin;
-			}
-
-			if(endTime > 0){ 
-				command += " -t " + endTime;
-			}
-
-			if(finalTimesFormat != null && !finalTimesFormat.equals("")){
-				command += " -v " + finalTimesFormat;
-			}
-
-			if(initialTimesFormat != null && !initialTimesFormat.equals("")){
-				command += " -V " + initialTimesFormat;
-			}
-
-			if(finalAnnotations){
-				command += " -w";
-			}
-
-			if(initialAnnotations){
-				command += " -W";
-			}
-
 			bRet = executeCommand(command, envVar, WORKING_DIR);
-
 			bRet &= stdErrorHandler();
 			
 			if(bRet){
 				switch (this.getAnalysisVO().getResultType()) {
-				case ORIGINAL_FILE:
-				case CSV_FILE:
-					List<String> outputFilenames = new ArrayList<String>();
-					
-					String outputFile;
-					if(AnalysisResultType.ORIGINAL_FILE.equals(this.getAnalysisVO().getResultType())){
-						outputFile = path + outputFilename + ".rr";
-						stdReturnHandler(outputFile);
-					}else{
-						outputFile = stdCSVReturnHandler(path, outputFilename, null);	
-					}
-					
-					outputFilenames.add(outputFile);
-					this.getAnalysisVO().setOutputFileNames(outputFilenames);	
-					
-					break;
-				case JSON_DATA:
-					this.setJSONOutput();
-					break;
+					case ORIGINAL_FILE:
+					case CSV_FILE:
+						List<String> outputFilenames = new ArrayList<String>();
+						
+						String outputFile;
+						if(AnalysisResultType.ORIGINAL_FILE.equals(this.getAnalysisVO().getResultType())){
+							outputFile = path + outputFilename + ".rr";
+							stdReturnHandler(outputFile);
+						}else{
+							outputFile = stdCSVReturnHandler(path, outputFilename, null);	
+						}
+						
+						outputFilenames.add(outputFile);
+						this.getAnalysisVO().setOutputFileNames(outputFilenames);	
+						
+						break;
+					case JSON_DATA:
+						this.setJSONOutput();
+						break;
 				}
-				
-				
 			}else{
-				debugPrintln("- Encountered errors.");
+				throw new AnalysisExecutionException("Command execution error. ["+ command+"]");
 			}			
 
-		} catch (Exception e) {
-			bRet = false;
-			log.error(e.getMessage());
+		} catch (IOException e) {
+			throw new AnalysisExecutionException("Error on "+this.getAnalysisVO().getType()+" command output handling", e);
 		}
 
 		this.getAnalysisVO().setSucess(bRet);

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
+import edu.jhu.cvrg.analysis.util.AnalysisParameterException;
 import edu.jhu.cvrg.analysis.vo.AnalysisResultType;
 import edu.jhu.cvrg.analysis.vo.AnalysisType;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
@@ -64,6 +66,12 @@ public class MainAnalysisTest {
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
 		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (AnalysisExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (AnalysisParameterException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

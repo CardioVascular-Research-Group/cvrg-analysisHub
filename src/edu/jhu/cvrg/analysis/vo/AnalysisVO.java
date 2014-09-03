@@ -12,7 +12,7 @@ public class AnalysisVO {
 	private AnalysisResultType resultType;
 	
 	private List<String> inputFileNames;
-	public Map<String, Object> commandParamMap;
+	private Map<String, Object> commandParamMap;
 	
 	private String outputData;
 	private List<String> outputFileNames;

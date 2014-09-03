@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.jhu.cvrg.analysis.util.AnalysisFailureException;
+import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.util.AnalysisUtils;
 import edu.jhu.cvrg.analysis.vo.AnalysisResultType;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
@@ -32,7 +32,7 @@ public abstract class AnnotationOutputAnalysisWrapper extends ApplicationWrapper
 	
 	public abstract String getAnnotationExt();
 	
-	protected void execute_rdann(String path, String headerFilename, AnalysisResultType format) throws AnalysisFailureException{
+	protected void execute_rdann(String path, String headerFilename, AnalysisResultType format) throws AnalysisExecutionException{
 		
 		String[] asEnvVar = new String[0];   
 		int iIndexPeriod = headerFilename.lastIndexOf(".");
@@ -63,16 +63,16 @@ public abstract class AnnotationOutputAnalysisWrapper extends ApplicationWrapper
 			}
 			
 			stdReturnMethodHandler();
+		    log.info("--- execute_rdann() found " + lineNum + " annotations");
 		    
-			log.info("--- execute_rdann() found " + lineNum + " annotations");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new AnalysisExecutionException("Error on RDANN command output handling", e);
 		}finally{
 			AnalysisUtils.deleteFile(path+sRecord+'.'+this.getAnnotationExt());
 		}
 	}
 	
-	protected boolean processCommandReturn(boolean bRet, String path, String headerName, String record) throws IOException, AnalysisFailureException {
+	protected boolean processCommandReturn(boolean bRet, String path, String headerName, String record) throws IOException, AnalysisExecutionException {
 		
 		bRet &= stdErrorHandler();
 		
@@ -106,12 +106,11 @@ public abstract class AnnotationOutputAnalysisWrapper extends ApplicationWrapper
 					this.execute_rdann(path, headerName, this.getAnalysisVO().getResultType());
 					break;
 				default:
-					//TODO THROW EXCEPTION
-					break;
+					throw new AnalysisExecutionException("Unexpected format ["+this.getAnalysisVO().getResultType()+"] for this analysis ["+this.getAnalysisVO().getType()+"]");
 			}
 			
 		}else{
-			debugPrintln("- Encountered errors.");
+			throw new AnalysisExecutionException("Annotation file not generated");
 		}
 		return bRet;
 	}

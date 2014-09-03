@@ -20,7 +20,7 @@ public class AnalysisUtils {
 	 * @return - full path/name.ext as found in the array.
 	 */
 	public static String findHeaderPathName(List<String> asInputFileNames){
-		log.info("++ analysisUtils +findHeaderPathName()");
+		log.debug("++ analysisUtils +findHeaderPathName()");
 		return findPathNameExt(asInputFileNames, "hea");
 	}
 
@@ -31,44 +31,42 @@ public class AnalysisUtils {
 	 * @return - full path/name.ext as found in the array.
 	 */
 	public static String findPathNameExt(List<String> asInputFileNames, String sExtension){
-		log.info("++ analysisUtils +findHeaderPathName()");
-		String sHeaderPathName="";
-		int iIndexPeriod=0;
+		log.debug("++ analysisUtils +findHeaderPathName()");
+		String headerPathName="";
+		int indexPeriod=0;
 		
 		for (String sTemp : asInputFileNames) {
-			log.info("++ analysisUtils +- asInputFileNames: " + sTemp);
-			iIndexPeriod = sTemp.lastIndexOf(".");
+			log.debug("++ analysisUtils +- asInputFileNames: " + sTemp);
+			indexPeriod = sTemp.lastIndexOf(".");
 			
-			if( sExtension.contains(sTemp.substring(iIndexPeriod+1)) ){
-				sHeaderPathName = sTemp;
+			if( sExtension.contains(sTemp.substring(indexPeriod+1)) ){
+				headerPathName = sTemp;
 				break;
 			}
 		}
 		
-		log.info("++ analysisUtils +++ analysisUtils +- ssHeaderPathName: " + sHeaderPathName);
-		return sHeaderPathName;
+		log.debug("- headerPathName: " + headerPathName);
+		return headerPathName;
 	}
 	
-	public static String extractPath(String sHeaderPathName){
-		log.info("extractPath() from: '" + sHeaderPathName + "'");
+	public static String extractPath(String headerPathName){
+		log.debug("extractPath() from: '" + headerPathName + "'");
 
-		String sFilePath="";
-		int iIndexLastSlash = sHeaderPathName.lastIndexOf("/");
+		int indexLastSlash = headerPathName.lastIndexOf("/");
 		
-		sFilePath = sHeaderPathName.substring(0,iIndexLastSlash+1);
+		String filePath = headerPathName.substring(0,indexLastSlash+1);
 		
-		return sFilePath;
+		return filePath;
 	}
 	
 	public static String extractName(String sFilePathName){
-		log.info("extractName() from: '" + sFilePathName + "'");
+		log.debug("extractName() from: '" + sFilePathName + "'");
 
-		String sFileName="";
-		int iIndexLastSlash = sFilePathName.lastIndexOf("/");
+		int indexLastSlash = sFilePathName.lastIndexOf("/");
 		
-		sFileName = sFilePathName.substring(iIndexLastSlash+1);
+		String fileName = sFilePathName.substring(indexLastSlash+1);
 
-		return sFileName;
+		return fileName;
 	}
 	
 	public static void deleteFile(String inputPath, String inputFilename) {

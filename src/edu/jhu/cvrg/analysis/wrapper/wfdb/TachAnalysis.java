@@ -3,12 +3,16 @@ package edu.jhu.cvrg.analysis.wrapper.wfdb;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.jhu.cvrg.analysis.util.AnalysisParameterException;
 import edu.jhu.cvrg.analysis.util.AnalysisUtils;
+import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.util.RandomString;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
 import edu.jhu.cvrg.analysis.wrapper.AnnotationBasedAnalysisWrapper;
@@ -27,7 +31,7 @@ public class TachAnalysis extends AnnotationBasedAnalysisWrapper {
 	
 	private boolean outlier;
 	private boolean sampleNumber;
-	private boolean outputSeconds1;	
+	private boolean outputSeconds;	
 	private boolean outputMinutes;
 	private boolean outputHours;
 	
@@ -35,7 +39,7 @@ public class TachAnalysis extends AnnotationBasedAnalysisWrapper {
 	private String inputFilename;
 	private String outputFile;
 	
-	public TachAnalysis(AnalysisVO vo) {
+	public TachAnalysis(AnalysisVO vo) throws AnalysisParameterException, AnalysisExecutionException {
 		super(vo);
 	}
 
@@ -44,14 +48,14 @@ public class TachAnalysis extends AnnotationBasedAnalysisWrapper {
 	}
 
 	@Override
-	public void defineInputParameters() {
-		try {
-			//*** The analysis algorithm should return a String array containing the full path/names of the result files.
-			//String sAnnotator = "tach";
-			String annotationFileName = AnalysisUtils.findPathNameExt(this.getAnalysisVO().getFileNames(), ".atr.qrs");
-			annotator = annotationFileName.substring(annotationFileName.lastIndexOf('.')+1);
-			
-			
+	protected void _defineInputParameters() throws AnalysisParameterException {
+		
+		//*** The analysis algorithm should return a String array containing the full path/names of the result files.
+		//String sAnnotator = "tach";
+		String annotationFileName = AnalysisUtils.findPathNameExt(this.getAnalysisVO().getFileNames(), ".atr.qrs");
+		annotator = annotationFileName.substring(annotationFileName.lastIndexOf('.')+1);
+		
+		if(this.getAnalysisVO().getCommandParamMap() != null && !this.getAnalysisVO().getCommandParamMap().isEmpty()){
 			if(this.getAnalysisVO().getCommandParamMap().get("f") != null){
 				startTime = Integer.parseInt(    (String) this.getAnalysisVO().getCommandParamMap().get("f")); // -f Begin at the specified time 
 			}
@@ -82,73 +86,68 @@ public class TachAnalysis extends AnnotationBasedAnalysisWrapper {
 			 
 			outlier 		= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("O")); // -O Disable outlier rejection.  
 			sampleNumber	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("v")); // -v Print the output sample number before each output sample value. 
-			outputSeconds1	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("Vs")); // -Vs Print the output sample time in seconds 
+			outputSeconds	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("Vs")); // -Vs Print the output sample time in seconds 
 			outputMinutes	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("Vm")); // -Vm Print the output sample time in minutes 
 			outputHours 	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("Vh")); // -Vh Print the output sample time in hours
-			
-			path = AnalysisUtils.extractPath(this.getAnalysisVO().getFileNames().get(0));
-			inputFilename = AnalysisUtils.extractName(this.getAnalysisVO().getFileNames().get(0));
-			
-			debugPrintln("- sInputPath: " + path);
-			debugPrintln("- sInputName: " + inputFilename);
-			
-			int iIndexPeriod = inputFilename.lastIndexOf(".");
-			outputFile = inputFilename.substring(0, iIndexPeriod) + "_" + this.getAnalysisVO().getJobIdNumber();  // this should be the same name as the input file for this particular function
-			
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			this.getAnalysisVO().setErrorMessage(e.getMessage());
-		}		
-	
+		}
+		
+		path = AnalysisUtils.extractPath(this.getAnalysisVO().getFileNames().get(0));
+		inputFilename = AnalysisUtils.extractName(this.getAnalysisVO().getFileNames().get(0));
+		
+		debugPrintln("- path: " + path);
+		debugPrintln("- inputFilename: " + inputFilename);
+		
+		int indexPeriod = inputFilename.lastIndexOf(".");
+		outputFile = inputFilename.substring(0, indexPeriod) + "_" + this.getAnalysisVO().getJobIdNumber();  // this should be the same name as the input file for this particular function
 	}
 
 	@Override
-	public void execute() {
+	protected void _execute() throws AnalysisExecutionException {
 		boolean bRet = true;
 		debugPrintln("tach()");
-		debugPrintln("- sInputFile:" + inputFilename);
-		debugPrintln("- sPath:" + path);
-		debugPrintln("- bAnnotator:" + annotator);
-		debugPrintln("- bStartTime:" + startTime);  
-		debugPrintln("- iSampleFrequency:" + frequency);
-		debugPrintln("- iRate:" + rate);
-		debugPrintln("- iDuration:" + duration); 
-		debugPrintln("- iSamples:" + outputSamples); 
-		debugPrintln("- bOutlier:" + outlier); 
-		debugPrintln("- iSmoothing:" + smoothing);
-		debugPrintln("- iEndTime:" + endTime);  
-		debugPrintln("- bSampleNumber:" + sampleNumber);
-		debugPrintln("- bOutputSeconds1:" + outputSeconds1);
-		debugPrintln("- bOutputMinutes:" + outputMinutes);	
-		debugPrintln("- bOutputHours:" + outputHours);	
-		debugPrintln("- sOutputName:" + outputFile);
+		debugPrintln("- inputFilename:" + inputFilename);
+		debugPrintln("- path:" + path);
+		debugPrintln("- annotator:" + annotator);
+		debugPrintln("- startTime:" + startTime);  
+		debugPrintln("- frequency:" + frequency);
+		debugPrintln("- rate:" + rate);
+		debugPrintln("- duration:" + duration); 
+		debugPrintln("- outputSamples:" + outputSamples); 
+		debugPrintln("- outlier:" + outlier); 
+		debugPrintln("- smoothing:" + smoothing);
+		debugPrintln("- endTime:" + endTime);  
+		debugPrintln("- sampleNumber:" + sampleNumber);
+		debugPrintln("- outputSeconds:" + outputSeconds);
+		debugPrintln("- outputMinutes:" + outputMinutes);	
+		debugPrintln("- outputHours:" + outputHours);	
+		debugPrintln("- outputFile:" + outputFile);
 		
-		try {
 		
-		String[] asEnvVar = new String[0];  
+		
+		String[] envVar = new String[0];  
 		
 		// build command string
-		int iIndexPeriod = inputFilename.lastIndexOf(".");
-		String sRecord = inputFilename.substring(0, iIndexPeriod);
+		int indexPeriod = inputFilename.lastIndexOf(".");
+		String record = inputFilename.substring(0, indexPeriod);
 		
 		//sOutputFile = sRecord;
 		
-		String sCommand = "tach -r " + path + sRecord; // record name
+		String command = "tach -r " + path + record; // record name
 		
-		sCommand += " -a " + annotator;
+		command += " -a " + annotator;
 		
-		if(startTime > 0) sCommand += " -f " + startTime;
+		if(startTime > 0) command += " -f " + startTime;
 		if( (frequency != 2) && (frequency > 0) ) {
-			sCommand += " -F " + frequency;	
+			command += " -F " + frequency;	
 		}
-		if( (rate != 2) && (rate > 0) ) sCommand += " -i " + rate;
-		if(duration > 0) sCommand += "-l " + duration;
+		if( (rate != 2) && (rate > 0) ) command += " -i " + rate;
+		if(duration > 0) command += "-l " + duration;
 		
-		if(outputSamples > 0) sCommand += " -n " + outputSamples;
+		if(outputSamples > 0) command += " -n " + outputSamples;
 		
 		// the -o is a required parameter, the default is the input filename.
 		if(outputFile.equals("")){
-			outputFile = sRecord;
+			outputFile = record;
 		}
 		
 		//Problems with the output file path size, it's so big. 
@@ -157,71 +156,69 @@ public class TachAnalysis extends AnnotationBasedAnalysisWrapper {
 		String tempName = RandomString.newString(5);
 		String tempPathName = AnalysisUtils.SERVER_TEMP_ANALYSIS_FOLDER + File.separator + tempName;
 		
-		sCommand += " -o " + tempPathName;
+		command += " -o " + tempPathName;
 		
-		if(outlier) sCommand += " -O";
+		if(outlier) command += " -O";
 			
-		if(smoothing > 1) sCommand += " -s " + smoothing; 
-		if(endTime > 0) sCommand += " -t " + endTime;
-		if(sampleNumber) sCommand += " -v";
-		if(outputSeconds1) sCommand += " -Vs";
-		if(outputMinutes) sCommand += " -Vm";
-		if(outputHours) sCommand += " -Vh";
+		if(smoothing > 1) command += " -s " + smoothing; 
+		if(endTime > 0) command += " -t " + endTime;
+		if(sampleNumber) command += " -v";
+		if(outputSeconds) command += " -Vs";
+		if(outputMinutes) command += " -Vm";
+		if(outputHours) command += " -Vh";
 		
-		bRet = executeCommand(sCommand, asEnvVar, WORKING_DIR);
-		
-		bRet &= stdErrorHandler();
-		
-		if(bRet){
-			switch (this.getAnalysisVO().getResultType()) {
-			case ORIGINAL_FILE:
-				new File(tempPathName+".dat").renameTo(new File(finalPathName + ".dat"));
-				
-				File tmpHea = new File(tempPathName + ".hea");
-				File finalHea = new File(finalPathName + ".hea");
-				
-				finalHea.createNewFile();
-				
-				BufferedReader reader = new BufferedReader(new FileReader(tmpHea));
-				BufferedWriter writer = new BufferedWriter(new FileWriter(finalHea));
-				
-				String line;
-				while ((line = reader.readLine()) != null) {
-					line = line.replaceAll(tempPathName, outputFile);
-					writer.write(line);
-					writer.newLine();
+		try {
+			bRet = executeCommand(command, envVar, WORKING_DIR);
+			bRet &= stdErrorHandler();
+			
+			if(bRet){
+				switch (this.getAnalysisVO().getResultType()) {
+				case ORIGINAL_FILE:
+					new File(tempPathName+".dat").renameTo(new File(finalPathName + ".dat"));
+					
+					File tmpHea = new File(tempPathName + ".hea");
+					File finalHea = new File(finalPathName + ".hea");
+					
+					finalHea.createNewFile();
+					
+					BufferedReader reader = new BufferedReader(new FileReader(tmpHea));
+					BufferedWriter writer = new BufferedWriter(new FileWriter(finalHea));
+					
+					String line;
+					while ((line = reader.readLine()) != null) {
+						line = line.replaceAll(tempPathName, outputFile);
+						writer.write(line);
+						writer.newLine();
+					}
+					
+					reader.close();
+					writer.flush();
+					writer.close();
+					
+					tmpHea.delete();
+					RandomString.release(tempName);
+					
+					//set first output file to output generated by the sigamp command
+					List<String>outputFilenames = new ArrayList<String>();
+					debugPrintln("- sOutputName:" + outputFile);
+					outputFilenames.add(finalPathName + ".dat");
+					outputFilenames.add(finalPathName + ".hea");
+					
+					this.getAnalysisVO().setOutputFileNames(outputFilenames);
+					break;
+
+				default:
+					throw new AnalysisExecutionException("Unexpected output format ["+this.getAnalysisVO().getResultType()+"] for this analysis ["+this.getAnalysisVO().getType()+"]");
 				}
 				
-				reader.close();
-				writer.flush();
-				writer.close();
-				
-				tmpHea.delete();
-				RandomString.release(tempName);
-				
-				//set first output file to output generated by the sigamp command
-				List<String>outputFilenames = new ArrayList<String>();
-				debugPrintln("- sOutputName:" + outputFile);
-				outputFilenames.add(finalPathName + ".dat");
-				outputFilenames.add(finalPathName + ".hea");
-				
-				this.getAnalysisVO().setOutputFileNames(outputFilenames);
-				break;
-
-			default:
-				bRet = false;
-				debugPrintln("This analysis does not support the selected output format.");	
-				break;
+			}else{
+				throw new AnalysisExecutionException("Command execution error. ["+ command+"]");
 			}
-			
-		}else{
-			debugPrintln("- Encountered errors.");
+		} catch (FileNotFoundException e) {
+			throw new AnalysisExecutionException("Tach temporary file not found");
+		} catch (IOException e) {
+			throw new AnalysisExecutionException("Error on "+this.getAnalysisVO().getType()+" command output handling", e);
 		}			
-		
-		} catch (Exception e) {
-			bRet = false;
-			log.error(e.getMessage());
-		}
 		
 		this.getAnalysisVO().setSucess(bRet);
 	}

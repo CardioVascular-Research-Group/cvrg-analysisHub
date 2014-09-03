@@ -2,13 +2,15 @@ package edu.jhu.cvrg.analysis.wrapper;
 
 import java.lang.reflect.InvocationTargetException;
 
+import edu.jhu.cvrg.analysis.util.AnalysisParameterException;
+import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
 
 public abstract class AnnotationBasedAnalysisWrapper extends ApplicationWrapper {
 
 	private AnnotationOutputAnalysisWrapper annotationBased = null;
 	
-	public AnnotationBasedAnalysisWrapper(AnalysisVO vo) {
+	public AnnotationBasedAnalysisWrapper(AnalysisVO vo) throws AnalysisParameterException, AnalysisExecutionException {
 		super(vo);
 		
 		if(vo.getType().getAnnotationBase() != null){

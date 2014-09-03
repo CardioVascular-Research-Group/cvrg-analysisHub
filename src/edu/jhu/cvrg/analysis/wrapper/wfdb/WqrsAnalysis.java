@@ -2,7 +2,8 @@ package edu.jhu.cvrg.analysis.wrapper.wfdb;
 
 import java.io.IOException;
 
-import edu.jhu.cvrg.analysis.util.AnalysisFailureException;
+import edu.jhu.cvrg.analysis.util.AnalysisParameterException;
+import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.util.AnalysisUtils;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
 import edu.jhu.cvrg.analysis.wrapper.AnnotationOutputAnalysisWrapper;
@@ -38,61 +39,65 @@ public class WqrsAnalysis extends AnnotationOutputAnalysisWrapper {
 	}
 
 	@Override
-	public void defineInputParameters() {
-		//*** The analysis algorithm should return a String array containing the full path/names of the result files.
-		Object[] keys = this.getAnalysisVO().getCommandParamMap().keySet().toArray();
+	protected void _defineInputParameters() throws AnalysisParameterException {
 		
-		for(int i=0;i<keys.length;i++){
-			debugPrintln("Key: \"" + (String)keys[i] + "\" Value: \"" + this.getAnalysisVO().getCommandParamMap().get((String)keys[i]) + "\"");
+		if(this.getAnalysisVO().getCommandParamMap() != null  && !this.getAnalysisVO().getCommandParamMap().isEmpty()){
+			if(log.isDebugEnabled()){
+				Object[] keys = this.getAnalysisVO().getCommandParamMap().keySet().toArray();
+				
+				for(int i=0;i<keys.length;i++){
+					debugPrintln("Key: \"" + (String)keys[i] + "\" Value: \"" + this.getAnalysisVO().getCommandParamMap().get((String)keys[i]) + "\"");
+				}
+			}
+	
+			signal = (String) this.getAnalysisVO().getCommandParamMap().get("s");         				// -s
+			
+			if(this.getAnalysisVO().getCommandParamMap().get("f") != null){
+				begin = Integer.parseInt( (String) this.getAnalysisVO().getCommandParamMap().get("f"));    // -f	
+			}
+			
+			if(this.getAnalysisVO().getCommandParamMap().get("t") != null) {
+				time = Integer.parseInt( (String) this.getAnalysisVO().getCommandParamMap().get("t"));    // -t (-1) defaults to end of record.	
+			}
+			
+			if(this.getAnalysisVO().getCommandParamMap().get("m") != null){
+				threshold = Integer.parseInt( (String) this.getAnalysisVO().getCommandParamMap().get("m"));    // -m	
+			}
+			
+			if(this.getAnalysisVO().getCommandParamMap().get("p") != null){
+				powerFreq = Integer.parseInt( (String) this.getAnalysisVO().getCommandParamMap().get("p"));    // -p	
+			}
+			
+			dumpRaw 	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("b")); // -d
+			printHelp 	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("h")); // -h
+			highrez 	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("H")); // -H
+			findJPoints = Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("j")); // -j
+			resample 	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("R")); // -R
+			verbose 	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("v")); // -v
+			//**********************************************************************
 		}
-
-		signal = (String) this.getAnalysisVO().getCommandParamMap().get("s");         				// -s
 		
-		if(this.getAnalysisVO().getCommandParamMap().get("f") != null){
-			begin = Integer.parseInt( (String) this.getAnalysisVO().getCommandParamMap().get("f"));    // -f	
-		}
+		String headerPathName = AnalysisUtils.findHeaderPathName(this.getAnalysisVO().getFileNames());
+		path = AnalysisUtils.extractPath(headerPathName);
+		headerFilename = AnalysisUtils.extractName(headerPathName);
 		
-		if(this.getAnalysisVO().getCommandParamMap().get("t") != null) {
-			time = Integer.parseInt( (String) this.getAnalysisVO().getCommandParamMap().get("t"));    // -t (-1) defaults to end of record.	
-		}
-		
-		if(this.getAnalysisVO().getCommandParamMap().get("m") != null){
-			threshold = Integer.parseInt( (String) this.getAnalysisVO().getCommandParamMap().get("m"));    // -m	
-		}
-		
-		if(this.getAnalysisVO().getCommandParamMap().get("p") != null){
-			powerFreq = Integer.parseInt( (String) this.getAnalysisVO().getCommandParamMap().get("p"));    // -p	
-		}
-		
-		dumpRaw 	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("b")); // -d
-		printHelp 	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("h")); // -h
-		highrez 	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("H")); // -H
-		findJPoints = Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("j")); // -j
-		resample 	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("R")); // -R
-		verbose 	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("v")); // -v
-		//**********************************************************************
-		
-		String sHeaderPathName = AnalysisUtils.findHeaderPathName(this.getAnalysisVO().getFileNames());
-		path = AnalysisUtils.extractPath(sHeaderPathName);
-		headerFilename = AnalysisUtils.extractName(sHeaderPathName);
-		
-		debugPrintln("- sHeaderPathName: " + sHeaderPathName);
-		debugPrintln("- sHeaderPath: " + path);
-		debugPrintln("- sHeaderName: " + headerFilename);
+		debugPrintln("- headerPathName: " + headerPathName);
+		debugPrintln("- path: " + path);
+		debugPrintln("- headerFilename: " + headerFilename);
 	}
 
 	@Override
-	public void execute() {
+	protected void _execute() throws AnalysisExecutionException {
 		
 		boolean bRet = true;
 		debugPrintln("wqrs()");
-		debugPrintln("- sHeaderFile:" + headerFilename);
+		debugPrintln("- headerFilename:" + headerFilename);
 		debugPrintln("- sPath:" + path);
-		debugPrintln("- iBegin:" + begin);
-		debugPrintln("- bHighrez:" + highrez);
-		debugPrintln("- iThreshold:" + threshold);
-		debugPrintln("- sSignal:" + signal);
-		debugPrintln("- iTime:" + time);
+		debugPrintln("- begin:" + begin);
+		debugPrintln("- highrez:" + highrez);
+		debugPrintln("- threshold:" + threshold);
+		debugPrintln("- signal:" + signal);
+		debugPrintln("- time:" + time);
 		try {
 			// no environment variables are needed, 
 			// this is a place keeper so that the three parameter version of
@@ -103,30 +108,26 @@ public class WqrsAnalysis extends AnnotationOutputAnalysisWrapper {
 			int iIndexPeriod = headerFilename.lastIndexOf(".");
 			String sRecord = headerFilename.substring(0, iIndexPeriod);
 			
-			String sCommand = "wqrs -r " + path + sRecord;
-			if(dumpRaw) sCommand   += " -d ";
-			if(begin !=0) sCommand += " -f " + begin;
-			if(printHelp) sCommand += " -h ";
-			if(highrez) sCommand   += " -H ";
-			if(findJPoints) sCommand += " -j ";
-			if(threshold != 500) sCommand += " -m " + threshold;
-			if(powerFreq != 60) sCommand += " -p " + powerFreq;
-			if(resample) sCommand += " -R ";
-			if(signal != null && signal.equals("0")) sCommand += " -s " + signal;
-			if(time != -1) sCommand += " -t " + time;
+			String command = "wqrs -r " + path + sRecord;
+			if(dumpRaw) command   += " -d ";
+			if(begin !=0) command += " -f " + begin;
+			if(printHelp) command += " -h ";
+			if(highrez) command   += " -H ";
+			if(findJPoints) command += " -j ";
+			if(threshold != 500) command += " -m " + threshold;
+			if(powerFreq != 60) command += " -p " + powerFreq;
+			if(resample) command += " -R ";
+			if(signal != null && signal.equals("0")) command += " -s " + signal;
+			if(time != -1) command += " -t " + time;
 			
-			sCommand += " -v ";
+			command += " -v ";
 	
-			bRet = executeCommand(sCommand, asEnvVar, WORKING_DIR);
+			bRet = executeCommand(command, asEnvVar, WORKING_DIR);
 			
 			bRet = processCommandReturn(bRet,path, headerFilename, sRecord);
 			
 		} catch (IOException e) {
-			bRet = false;
-			log.error(e.getMessage());
-		} catch (AnalysisFailureException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new AnalysisExecutionException("Error on "+this.getAnalysisVO().getType()+" command output handling", e);
 		}
 		this.getAnalysisVO().setSucess(bRet);
 	}

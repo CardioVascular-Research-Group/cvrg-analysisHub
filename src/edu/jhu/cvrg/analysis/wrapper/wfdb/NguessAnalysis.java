@@ -1,9 +1,12 @@
 package edu.jhu.cvrg.analysis.wrapper.wfdb;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
+import edu.jhu.cvrg.analysis.util.AnalysisParameterException;
 import edu.jhu.cvrg.analysis.util.AnalysisUtils;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
 import edu.jhu.cvrg.analysis.wrapper.AnnotationBasedAnalysisWrapper;
@@ -19,7 +22,7 @@ public class NguessAnalysis extends AnnotationBasedAnalysisWrapper {
 	private String inputFilename;
 	private String outputFilename = null;
 	
-	public NguessAnalysis(AnalysisVO vo) {
+	public NguessAnalysis(AnalysisVO vo) throws AnalysisParameterException, AnalysisExecutionException {
 		super(vo);
 	}
 
@@ -28,78 +31,76 @@ public class NguessAnalysis extends AnnotationBasedAnalysisWrapper {
 	}
 
 	@Override
-	public void defineInputParameters() {
-		//*** The analysis algorithm should return a String array containing the full path/names of the result files.
+	protected void _defineInputParameters() throws AnalysisParameterException {
+		
 		String annotationFileName = AnalysisUtils.findPathNameExt(this.getAnalysisVO().getFileNames(), ".atr.qrs");
 		annotator = annotationFileName.substring(annotationFileName.lastIndexOf('.')+1);
-		
-		
-		if(this.getAnalysisVO().getCommandParamMap().get("f") != null){
-			startTime	= Integer.parseInt( (String) this.getAnalysisVO().getCommandParamMap().get("f"));    // -f
-		}
-		
-		
-		if(this.getAnalysisVO().getCommandParamMap().get("t") != null){
-			endTime = Integer.parseInt( (String) this.getAnalysisVO().getCommandParamMap().get("t"));    // -t (-1) defaults to end of record.
-		}
-		 	
-		if( this.getAnalysisVO().getCommandParamMap().get("f") != null){
-			qInterval	= Double.parseDouble( (String) this.getAnalysisVO().getCommandParamMap().get("f"));    // -f	
-		}
 		
 		path = AnalysisUtils.extractPath(this.getAnalysisVO().getFileNames().get(0));
 		inputFilename = AnalysisUtils.extractName(this.getAnalysisVO().getFileNames().get(0));
 		
-		debugPrintln("- sInputPath: " + path);
-		debugPrintln("- sInputName: " + inputFilename);
+		int index = inputFilename.lastIndexOf(".");
+		outputFilename = inputFilename.substring(0, index);
 		
-		
-		if( this.getAnalysisVO().getCommandParamMap().get("o") != null){
-			outputFilename = (String) this.getAnalysisVO().getCommandParamMap().get("o"); // -o  // In this case, this variable defines the extension, not the filename
-		}else{
-			int index = inputFilename.lastIndexOf(".");
-			outputFilename = inputFilename.substring(0, index);
+		if(this.getAnalysisVO().getCommandParamMap() != null && !this.getAnalysisVO().getCommandParamMap().isEmpty()){
+			if(this.getAnalysisVO().getCommandParamMap().get("f") != null){
+				startTime	= Integer.parseInt( (String) this.getAnalysisVO().getCommandParamMap().get("f"));    // -f
+			}
+			
+			if(this.getAnalysisVO().getCommandParamMap().get("t") != null){
+				endTime = Integer.parseInt( (String) this.getAnalysisVO().getCommandParamMap().get("t"));    // -t (-1) defaults to end of record.
+			}
+			 	
+			if( this.getAnalysisVO().getCommandParamMap().get("f") != null){
+				qInterval	= Double.parseDouble( (String) this.getAnalysisVO().getCommandParamMap().get("f"));    // -f	
+			}
+			
+			if( this.getAnalysisVO().getCommandParamMap().get("o") != null){
+				outputFilename = (String) this.getAnalysisVO().getCommandParamMap().get("o"); // -o  // In this case, this variable defines the extension, not the filename
+			}
 		}
+		
+		debugPrintln("- path: " + path);
+		debugPrintln("- inputFilename: " + inputFilename);
 		
 		outputFilename = outputFilename + '_' + this.getAnalysisVO().getJobIdNumber(); 
 		
 	}
 
 	@Override
-	public void execute() {
+	protected void _execute() throws AnalysisExecutionException {
 		boolean bRet = true;
 		debugPrintln("nguess()");
-		debugPrintln("- sInputFile:" + inputFilename);
-		debugPrintln("- sPath:" + path);
-		debugPrintln("- bAnnotator:" + annotator);
-		debugPrintln("- bStartTime:" + startTime);  		
-		debugPrintln("- dQInterval:" + qInterval);
-		debugPrintln("- iRate:" + endTime);
-		debugPrintln("- sOutputName:" + outputFilename);
+		debugPrintln("- inputFilename:" + inputFilename);
+		debugPrintln("- path:" + path);
+		debugPrintln("- annotator:" + annotator);
+		debugPrintln("- startTime:" + startTime);  		
+		debugPrintln("- qInterval:" + qInterval);
+		debugPrintln("- endTime:" + endTime);
+		debugPrintln("- outputFilename:" + outputFilename);
+	
+		String[] envVar = new String[0];  
+		
+		// build command string
+		int index = inputFilename.lastIndexOf(".");
+		String record = inputFilename.substring(0, index);
+		
+		//sOutputFile = sRecord;
+		
+		String command = "nguess -r " + path + record; // record name
+		
+		command += " -a " + annotator;
+		if(startTime > 0) command += " -f " + startTime;
+
+		if(qInterval > 0) {
+			command += " -m " + qInterval;	
+		}
+
+		if(endTime > 0) command += " -t " + endTime;
 		
 		try {
-		
-			String[] asEnvVar = new String[0];  
-			
-			// build command string
-			int iIndexPeriod = inputFilename.lastIndexOf(".");
-			String sRecord = inputFilename.substring(0, iIndexPeriod);
-			
-			//sOutputFile = sRecord;
-			
-			String sCommand = "nguess -r " + path + sRecord; // record name
-			
-			sCommand += " -a " + annotator;
-			if(startTime > 0) sCommand += " -f " + startTime;
-	
-			if(qInterval > 0) {
-				sCommand += " -m " + qInterval;	
-			}
-	
-			if(endTime > 0) sCommand += " -t " + endTime;
-			
-			bRet = executeCommand(sCommand, asEnvVar, WORKING_DIR);
-			
+				
+			bRet = executeCommand(command, envVar, WORKING_DIR);
 			bRet &= stdErrorHandler();
 			
 			if(bRet){
@@ -107,32 +108,28 @@ public class NguessAnalysis extends AnnotationBasedAnalysisWrapper {
 				case ORIGINAL_FILE:
 					stdReturnHandler();
 					String outputFile = path + outputFilename + ".nguess";
-					new File(path + sRecord+".nguess").renameTo(new File(path + outputFilename + ".nguess"));
+					new File(path + record + ".nguess").renameTo(new File(path + outputFilename + ".nguess"));
 					
 					//set first output file to output generated by the sigamp command
 					List<String> outputFilenames = new ArrayList<String>();
-					debugPrintln("- sOutputName:" + outputFile);
+					debugPrintln("- outputFile:" + outputFile);
 					outputFilenames.add(outputFile);
 					
 					this.getAnalysisVO().setOutputFileNames(outputFilenames);	
 					break;
 				default:
-					bRet = false;
-					debugPrintln("This analysis does not support the selected output format.");
-					break;
+					throw new AnalysisExecutionException("Unexpected output format ["+this.getAnalysisVO().getResultType()+"] for this analysis ["+this.getAnalysisVO().getType()+"]");
 				}
 				
 			}else{
-				debugPrintln("- Encountered errors.");
+				throw new AnalysisExecutionException("Command execution error. ["+ command+"]");
 			}			
 		
-		} catch (Exception e) {
-			bRet = false;
-			log.error(e.getMessage());
+		} catch (IOException e) {
+			throw new AnalysisExecutionException("Error on "+this.getAnalysisVO().getType()+" command output handling", e);
 		}
 		
 		this.getAnalysisVO().setSucess(bRet);
-
 	}
 
 }

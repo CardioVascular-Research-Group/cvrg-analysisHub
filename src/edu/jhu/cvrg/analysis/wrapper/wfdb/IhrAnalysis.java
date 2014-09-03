@@ -1,9 +1,12 @@
 package edu.jhu.cvrg.analysis.wrapper.wfdb;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.jhu.cvrg.analysis.util.AnalysisParameterException;
 import edu.jhu.cvrg.analysis.util.AnalysisUtils;
+import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
 import edu.jhu.cvrg.analysis.wrapper.AnnotationBasedAnalysisWrapper;
 
@@ -25,22 +28,19 @@ public class IhrAnalysis extends AnnotationBasedAnalysisWrapper{
 	private String inputFilename;
 	private String outputName; 
 	
-	public IhrAnalysis(AnalysisVO vo) {
+	public IhrAnalysis(AnalysisVO vo) throws AnalysisParameterException, AnalysisExecutionException {
 		super(vo);
 		setDataHeaders(new String[]{"Elapsed time (in seconds)", "Instantaneous heart rate (in beats per minute)", "Interval type"});
 	}
 
 	@Override
 	protected void processReturnLine(String line) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
-	public void defineInputParameters() {
-		debugPrintln("executeV2_ihr()");
-		try {
-			//*** The analysis algorithm should return a String array containing the full path/names of the result files.
+	protected void _defineInputParameters() throws AnalysisParameterException {
+		
+		if(this.getAnalysisVO().getCommandParamMap() != null && !this.getAnalysisVO().getCommandParamMap().isEmpty()){
 			startTime		= (String) this.getAnalysisVO().getCommandParamMap().get("f"); // -f
 			//we can use more than one -p on command, but for now we will not support
 			type				= (String) this.getAnalysisVO().getCommandParamMap().get("p"); // -p
@@ -55,28 +55,24 @@ public class IhrAnalysis extends AnnotationBasedAnalysisWrapper{
 			printSummary	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("h")); // -h
 			includeIntervals	= Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("i")); // -v
 			excludeIntervals = Boolean.parseBoolean((String) this.getAnalysisVO().getCommandParamMap().get("x")); // -x
-			
-			annotationFileName = AnalysisUtils.findPathNameExt(this.getAnalysisVO().getFileNames(), ".atr.qrs.wqrs");
-			annotator = annotationFileName.substring(annotationFileName.lastIndexOf('.')+1);
-			
-			//**********************************************************************
-			path = AnalysisUtils.extractPath(this.getAnalysisVO().getFileNames().get(0));
-			inputFilename = AnalysisUtils.extractName(this.getAnalysisVO().getFileNames().get(0));
-			
-			outputName = inputFilename.substring(0, inputFilename.lastIndexOf(".")) + '_' + this.getAnalysisVO().getJobIdNumber();
-			
-			debugPrintln("- sInputPath: " + path);
-			debugPrintln("- sInputName: " + inputFilename);
-			
-		} catch (Exception e) {
-			String errorMessage = e.getMessage();
-			log.error(errorMessage);
-			this.getAnalysisVO().setErrorMessage(errorMessage);
-		}		
+		}
+		
+		annotationFileName = AnalysisUtils.findPathNameExt(this.getAnalysisVO().getFileNames(), ".atr.qrs.wqrs");
+		annotator = annotationFileName.substring(annotationFileName.lastIndexOf('.')+1);
+		
+		//**********************************************************************
+		path = AnalysisUtils.extractPath(this.getAnalysisVO().getFileNames().get(0));
+		inputFilename = AnalysisUtils.extractName(this.getAnalysisVO().getFileNames().get(0));
+		
+		outputName = inputFilename.substring(0, inputFilename.lastIndexOf(".")) + '_' + this.getAnalysisVO().getJobIdNumber();
+		
+		debugPrintln("- path: " + path);
+		debugPrintln("- inputFilename: " + inputFilename);
+		
 	}
 
 	@Override
-	public void execute() {
+	protected void _execute() throws AnalysisExecutionException {
 		boolean bRet = true;
 		debugPrintln("ihr()");
 		debugPrintln("- inputName:" + inputFilename);
@@ -91,8 +87,6 @@ public class IhrAnalysis extends AnnotationBasedAnalysisWrapper{
 		debugPrintln("- excludeIntervals:" + excludeIntervals);
 		debugPrintln("- type:" + type);
 		debugPrintln("- outputName:" + outputName);
-		
-		try {
 		
 		String[] envVar = new String[0];  
 		
@@ -136,42 +130,41 @@ public class IhrAnalysis extends AnnotationBasedAnalysisWrapper{
 			command += " -p " + type; //Include intervals bounded by annotations of the specified types only. The type arguments should be annotation mnemonics (e.g., N) as normally printed by rdann(1) in the third column. More than one -p option may be used in a single command, and each -p option may have more than one type argument following it. If type begins with ‘‘-’’, however, it must immediately follow -p (standard annotation mnemonics do not begin with ‘‘-’’, but modification labels in an annotation file may define such mnemonics).
 		}
 		
-		bRet = executeCommand(command, envVar, WORKING_DIR);
-		
-		bRet &= stdErrorHandler();
-		
-		if(bRet){
+		try {
+			bRet = executeCommand(command, envVar, WORKING_DIR);
+			bRet &= stdErrorHandler();
 			
-			switch (this.getAnalysisVO().getResultType()) {
-				case CSV_FILE:
-					String outputFile = stdCSVReturnHandler(path, outputName, this.getDataHeaders());
-					
-					//set first output file.
-					List<String> outputFilenames = new ArrayList<String>();
-					debugPrintln("- sOutputName:" + outputFile);
-					outputFilenames.add(outputFile);
-					
-					this.getAnalysisVO().setOutputFileNames(outputFilenames);
-					
-					break;
-				case JSON_DATA:
-					this.setJSONOutput();
-					break;
-					
-				default:
-					break;
-			}
+			if(bRet){
+				
+				switch (this.getAnalysisVO().getResultType()) {
+					case CSV_FILE:
+						String outputFile = stdCSVReturnHandler(path, outputName, this.getDataHeaders());
+						
+						//set first output file.
+						List<String> outputFilenames = new ArrayList<String>();
+						debugPrintln("- outputFile:" + outputFile);
+						outputFilenames.add(outputFile);
+						
+						this.getAnalysisVO().setOutputFileNames(outputFilenames);
+						
+						break;
+					case JSON_DATA:
+						this.setJSONOutput();
+						break;
+						
+					default:
+						throw new AnalysisExecutionException("Unexpected output format ["+this.getAnalysisVO().getResultType()+"] for this analysis ["+this.getAnalysisVO().getType()+"]");
+				}
+				
+			}else{
+				throw new AnalysisExecutionException("Command execution error. ["+ command+"]");
+			}			
 			
-			
-		}else{
-			debugPrintln("- Encountered errors.");
-		}			
-		
-		} catch (Exception e) {
-			bRet = false;
-			log.error(e.getMessage());
+		} catch (IOException e) {
+			throw new AnalysisExecutionException("Error on "+this.getAnalysisVO().getType()+" command output handling", e);
 		}
 		
+		this.getAnalysisVO().setSucess(bRet);
 	}
 
 }

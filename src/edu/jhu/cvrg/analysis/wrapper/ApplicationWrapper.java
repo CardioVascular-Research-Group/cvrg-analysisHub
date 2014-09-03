@@ -160,109 +160,99 @@ public abstract class ApplicationWrapper extends AnalysisWrapper {
 	protected String stdCSVReturnHandler(String path, String outputFilename, String[] headers) throws IOException{
 	    String line;
 	    String file = path + outputFilename + ".csv";
-		try{
-			
-			// Create file 
-			debugPrintln("stdReturnHandler(FName) Creating output file: " + file);
-			FileWriter fstream = new FileWriter(file);
-			BufferedWriter bwOut = new BufferedWriter(fstream);
-
-			lineNum = 0;
-		    debugPrintln("Here is the returned text of the command (if any): \"");
-		    
-		    if(headers != null ){
-		    	String headerLine = "";
-	    		for (String string : headers) {
-					headerLine += (string+','); 
-				}
-	    		headerLine = headerLine.substring(0, headerLine.length()-1);
-	    		bwOut.write(headerLine);
-		    	bwOut.newLine();
-		    }
-		    
-		    while ((line = stdInputBuffer.readLine()) != null) {
-		    	
-		    	line = line.replaceAll("\\s+",",").replaceAll("\\t",", "); 
-		    	if(line.charAt(0) == ','){
-		    		line = line.substring(1, line.length());
-		    	}
-		    	
-		    	bwOut.write(line);
-		    	bwOut.newLine();
-		    	if (lineNum<10){
-		    		debugPrintln(lineNum + ")" + line);
-		    	}
-		    	
-		    	lineNum++;
-		    }
-		    debugPrintln(lineNum + ")" + line);
-	        debugPrintln("\"");
-			bwOut.flush();
-			//Close the output stream
-			bwOut.close();
-		}catch (Exception e){//Catch exception if any
-		   log.error("Error: " + e.getMessage());
-		}
 		
+	    // Create file 
+		debugPrintln("stdReturnHandler(FName) Creating output file: " + file);
+		FileWriter fstream = new FileWriter(file);
+		BufferedWriter bwOut = new BufferedWriter(fstream);
+
+		lineNum = 0;
+	    debugPrintln("Here is the returned text of the command (if any): \"");
+	    
+	    if(headers != null ){
+	    	String headerLine = "";
+    		for (String string : headers) {
+				headerLine += (string+','); 
+			}
+    		headerLine = headerLine.substring(0, headerLine.length()-1);
+    		bwOut.write(headerLine);
+	    	bwOut.newLine();
+	    }
+	    
+	    while ((line = stdInputBuffer.readLine()) != null) {
+	    	
+	    	line = line.replaceAll("\\s+",",").replaceAll("\\t",", "); 
+	    	if(line.charAt(0) == ','){
+	    		line = line.substring(1, line.length());
+	    	}
+	    	
+	    	bwOut.write(line);
+	    	bwOut.newLine();
+	    	if (lineNum<10){
+	    		debugPrintln(lineNum + ")" + line);
+	    	}
+	    	
+	    	lineNum++;
+	    }
+	    debugPrintln(lineNum + ")" + line);
+        debugPrintln("\"");
+		bwOut.flush();
+		//Close the output stream
+		bwOut.close();
+	
 		return file;
 	}
 	
 	protected String stdJSONReturnHandler(String[] headers) throws IOException{
 	    StringBuilder sb = new StringBuilder("{\"results\":[");
-	    try{
-			
-			
-			lineNum = 0;
-		    
-		    String line;
-		    while ((line = stdInputBuffer.readLine()) != null) {
-		    	
-		    	line = line.replaceAll("\\s+",",").replaceAll("\\t",", ");
-		    	if(line.charAt(0) == ','){
-		    		line = line.substring(1, line.length());
-		    	}
-		    	
-		    	String[] values = line.split(",");
-		    	
-		    	int columnLenght = values.length;
-		    	if(headers != null){
-		    		sb.append('{');
-		    		columnLenght = headers.length;
-		    	}
-		    	
-		    	for (int j = 0; j < columnLenght; j++) {
-		    		if(headers != null){
-		    			sb.append('\"').append(headers[j]).append("\":");
-		    		}
-		    		if(j < values.length){
-		    			try{
-		    				Double.parseDouble(values[j]);
-		    				sb.append(values[j]);
-		    			}catch (NumberFormatException e){
-		    				sb.append('\"').append(values[j]).append('\"');	
-		    			}
-		    		}else{
-		    			sb.append("null");
-		    		}
-		    		
-		    		sb.append(',');
-				}
-		    	
-		    	sb.deleteCharAt(sb.lastIndexOf(","));
-		    	
-		    	if(headers != null){
-		    		sb.append('}');
-		    	}
-		    	sb.append(",\n");
-		    }
-			
-		    sb.deleteCharAt(sb.lastIndexOf(","));
-		    sb.append("]}");
-		    
-		}catch (Exception e){//Catch exception if any
-		   log.error("Error: " + e.getMessage());
-		}
+	   	
+		lineNum = 0;
+	    
+	    String line;
+	    while ((line = stdInputBuffer.readLine()) != null) {
+	    	
+	    	line = line.replaceAll("\\s+",",").replaceAll("\\t",", ");
+	    	if(line.charAt(0) == ','){
+	    		line = line.substring(1, line.length());
+	    	}
+	    	
+	    	String[] values = line.split(",");
+	    	
+	    	int columnLenght = values.length;
+	    	if(headers != null){
+	    		sb.append('{');
+	    		columnLenght = headers.length;
+	    	}
+	    	
+	    	for (int j = 0; j < columnLenght; j++) {
+	    		if(headers != null){
+	    			sb.append('\"').append(headers[j]).append("\":");
+	    		}
+	    		if(j < values.length){
+	    			try{
+	    				Double.parseDouble(values[j]);
+	    				sb.append(values[j]);
+	    			}catch (NumberFormatException e){
+	    				sb.append('\"').append(values[j]).append('\"');	
+	    			}
+	    		}else{
+	    			sb.append("null");
+	    		}
+	    		
+	    		sb.append(',');
+			}
+	    	
+	    	sb.deleteCharAt(sb.lastIndexOf(","));
+	    	
+	    	if(headers != null){
+	    		sb.append('}');
+	    	}
+	    	sb.append(",\n");
+	    }
 		
+	    sb.deleteCharAt(sb.lastIndexOf(","));
+	    sb.append("]}");
+		    
 		return sb.toString();
 	}
 	

@@ -8,7 +8,9 @@ import java.util.ArrayList;
 
 import org.apache.commons.lang.ArrayUtils;
 
+import edu.jhu.cvrg.analysis.util.AnalysisParameterException;
 import edu.jhu.cvrg.analysis.util.AnalysisUtils;
+import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.vo.AnalysisResultType;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
 import edu.jhu.cvrg.analysis.wrapper.AnalysisWrapper;
@@ -30,7 +32,7 @@ public class QrsScoreAnalysis extends AnalysisWrapper {
 	}
 
 	@Override
-	public void defineInputParameters() {
+	protected void _defineInputParameters() throws AnalysisParameterException {
 		//*** The analysis algorithm should return a String array containing the full path/names of the result files.
 		if(log.isDebugEnabled()){
 			Object[] keys = this.getAnalysisVO().getCommandParamMap().keySet().toArray();
@@ -42,13 +44,13 @@ public class QrsScoreAnalysis extends AnalysisWrapper {
 
 		// WFDB files consist of a header file and one or more data files.
 		// This function takes the header file as a parameter, and then uses it to look up the name(s) of the data file(s).
-		String sHeaderPathName = AnalysisUtils.findHeaderPathName(this.getAnalysisVO().getFileNames());
-		path = AnalysisUtils.extractPath(sHeaderPathName);
-		headerFilename = AnalysisUtils.extractName(sHeaderPathName);
+		String headerPathName = AnalysisUtils.findHeaderPathName(this.getAnalysisVO().getFileNames());
+		path = AnalysisUtils.extractPath(headerPathName);
+		headerFilename = AnalysisUtils.extractName(headerPathName);
 		
-		debugPrintln("- sHeaderPathName: " + sHeaderPathName);
+		debugPrintln("- headerPathName: " + headerPathName);
 		debugPrintln("- path: " + path);
-		debugPrintln("- sHeaderName: " + headerFilename);
+		debugPrintln("- headerFilename: " + headerFilename);
 		
 		debugPrintln("- Starting QRS_Score()");
 		qrs = new QRS_Score();
@@ -119,102 +121,105 @@ public class QrsScoreAnalysis extends AnalysisWrapper {
 		if(this.getAnalysisVO().getCommandParamMap().get("ECG_000000652_10") != null){  qrs.sa_V5  = Float.parseFloat( (String) this.getAnalysisVO().getCommandParamMap().get("ECG_000000652_10"));	}else{missing++; missingList += "sa_V5/";} // sa_V5
 		if(this.getAnalysisVO().getCommandParamMap().get("ECG_000000652_11") != null){  qrs.sa_V6  = Float.parseFloat( (String) this.getAnalysisVO().getCommandParamMap().get("ECG_000000652_11"));	}else{missing++; missingList += "sa_V6";} // sa_V6
 
+		if(missing > 5){
+			throw new AnalysisParameterException(" Missing " + missing + " critical parameters.");
+		}
+		
+		if(missingList.length()>0){
+			debugPrintln("Missing parameter List: " + missingList);
+		}
 		
 	}
 
 	@Override
-	public void execute() {
+	protected void _execute() throws AnalysisExecutionException {
 		boolean bRet = true;
 		debugPrintln("straussSelvesterQRS_score()");
 		debugPrintln("- sHeaderFile:" + headerFilename);
 		debugPrintln("- sPath:" + path);
-		try {
-			int iIndexPeriod = headerFilename.lastIndexOf(".");
-			String record = headerFilename.substring(0, iIndexPeriod);
+		
+		int iIndexPeriod = headerFilename.lastIndexOf(".");
+		String record = headerFilename.substring(0, iIndexPeriod);
 
-			int[] result = qrs.calculateQRS_score_Full();
-			String conductionTypeName = qrs.getConductionTypeName();
-			int[] scarPercentages = qrs.getPercentLVScarBySegment();
-			int badParamCount = qrs.badParameterCount;
-			int posError = qrs.positiveError;
-			int negError = qrs.negativeError;
-			
-			int[] extraValues = new int[]{badParamCount, posError, negError};
+		int[] result = qrs.calculateQRS_score_Full();
+		String conductionTypeName = qrs.getConductionTypeName();
+		int[] scarPercentages = qrs.getPercentLVScarBySegment();
+		int badParamCount = qrs.badParameterCount;
+		int posError = qrs.positiveError;
+		int negError = qrs.negativeError;
+		
+		int[] extraValues = new int[]{badParamCount, posError, negError};
 
-		    StringBuilder sb = new StringBuilder();
-		    if(AnalysisResultType.JSON_DATA.equals(this.getAnalysisVO().getResultType())){
-			    sb.append("{ \"results\" : [ \n");
-		    }else{
-		    	for (int i = 0; i < this.getDataHeaders().length; i++) {
-			    	 sb.append(this.getDataHeaders()[i]);
-			    	 if(i < this.getDataHeaders().length){
-			    		 sb.append(',');
-			    	 }
-				}
-		    	sb.deleteCharAt(sb.lastIndexOf(","));
-			    sb.append('\n');
-		    }
-		    
-		    int[] values = ArrayUtils.addAll(ArrayUtils.addAll(scarPercentages, result), extraValues);
-		    
-		    sb.append(this.writeData(conductionTypeName, values, qrs.missingParamList));
-		   
-		    
-		    if(qrs.scode.size()==0){ 
-		    	// no Marquette 12SL ECG analysis program statement codes found, so conduction type could not be determined
-		    	// Therefore calculate all conductions types so that the researcher can choose the most appropriate.
-		    	for(int type = 2;type<=6;type++){
-		    		result = qrs.calculateQRS_score_Full(type);
-					conductionTypeName = qrs.getConductionTypeName();
-					scarPercentages = qrs.getPercentLVScarBySegment();
-					
-					values = ArrayUtils.addAll(scarPercentages, result);
-					
-					sb.append(this.writeData(conductionTypeName, values, null));
-				}
-		    }
-
-		    
-			switch (this.getAnalysisVO().getResultType()) {
-				case ORIGINAL_FILE:
-				case CSV_FILE:
-					BufferedWriter  writer = null;
-					try {
-						String fileName = path + record + "_" + this.getAnalysisVO().getJobId() + ".csv";
-					    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), "utf-8"));
-					    
-					    writer.write(sb.toString());
-					    
-					    if(bRet){
-							ArrayList<String> outputFilenames = new ArrayList<String>();
-							outputFilenames.add(fileName);
-							this.getAnalysisVO().setOutputFileNames(outputFilenames);
-						}else{
-							debugPrintln("- Encountered errors.");
-						}
-					} catch (IOException ex) {
-						  bRet = false;
-					} finally {
-					   try {
-						   writer.close();
-					   }catch (Exception ex) {
-						   bRet = false;
-					   }
-					}
-					break;
-	
-				case JSON_DATA:
-					sb.deleteCharAt(sb.lastIndexOf(","));
-					sb.append("]}");
-					this.getAnalysisVO().setOutputData(sb.toString());
-					this.getAnalysisVO().setOutputFileNames(null);
-					break;
+	    StringBuilder sb = new StringBuilder();
+	    if(AnalysisResultType.JSON_DATA.equals(this.getAnalysisVO().getResultType())){
+		    sb.append("{ \"results\" : [ \n");
+	    }else{
+	    	for (int i = 0; i < this.getDataHeaders().length; i++) {
+		    	 sb.append(this.getDataHeaders()[i]);
+		    	 if(i < this.getDataHeaders().length){
+		    		 sb.append(',');
+		    	 }
 			}
-			
-		} catch (Exception e) {
-			bRet = false;
-			log.error(e.getMessage());
+	    	sb.deleteCharAt(sb.lastIndexOf(","));
+		    sb.append('\n');
+	    }
+	    
+	    int[] values = ArrayUtils.addAll(ArrayUtils.addAll(scarPercentages, result), extraValues);
+	    
+	    sb.append(this.writeData(conductionTypeName, values, qrs.missingParamList));
+	   
+	    
+	    if(qrs.scode.size()==0){ 
+	    	// no Marquette 12SL ECG analysis program statement codes found, so conduction type could not be determined
+	    	// Therefore calculate all conductions types so that the researcher can choose the most appropriate.
+	    	for(int type = 2;type<=6;type++){
+	    		result = qrs.calculateQRS_score_Full(type);
+				conductionTypeName = qrs.getConductionTypeName();
+				scarPercentages = qrs.getPercentLVScarBySegment();
+				
+				values = ArrayUtils.addAll(scarPercentages, result);
+				
+				sb.append(this.writeData(conductionTypeName, values, null));
+			}
+	    }
+
+	    
+		switch (this.getAnalysisVO().getResultType()) {
+			case ORIGINAL_FILE:
+			case CSV_FILE:
+				BufferedWriter  writer = null;
+				try {
+					String fileName = path + record + "_" + this.getAnalysisVO().getJobId() + ".csv";
+				    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), "utf-8"));
+				    
+				    writer.write(sb.toString());
+				    
+				    if(bRet){
+						ArrayList<String> outputFilenames = new ArrayList<String>();
+						outputFilenames.add(fileName);
+						this.getAnalysisVO().setOutputFileNames(outputFilenames);
+					}else{
+						debugPrintln("- Encountered errors.");
+					}
+				} catch (IOException ex) {
+					  bRet = false;
+				} finally {
+				   try {
+					   writer.close();
+				   }catch (Exception ex) {
+					   bRet = false;
+				   }
+				}
+				break;
+
+			case JSON_DATA:
+				sb.deleteCharAt(sb.lastIndexOf(","));
+				sb.append("]}");
+				this.getAnalysisVO().setOutputData(sb.toString());
+				this.getAnalysisVO().setOutputFileNames(null);
+				break;
 		}
+		
 		this.getAnalysisVO().setSucess(bRet);
 	}
 	

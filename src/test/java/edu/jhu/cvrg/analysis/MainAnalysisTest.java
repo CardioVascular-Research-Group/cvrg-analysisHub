@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.util.AnalysisParameterException;
 import edu.jhu.cvrg.analysis.vo.AnalysisResultType;
@@ -15,8 +19,10 @@ import edu.jhu.cvrg.analysis.wrapper.AnalysisWrapper;
 
 public class MainAnalysisTest {
 	
-	public static void main(String[] args) {
-		
+	private AnalysisVO analysis = null;
+	
+	@Before
+	public void setup(){
 		String jobId = "1";
 		AnalysisType type = AnalysisType.SQRS4IHR;
 		AnalysisResultType resulType = AnalysisResultType.JSON_DATA;
@@ -27,10 +33,13 @@ public class MainAnalysisTest {
 		
 		Map<String, Object> params = new HashMap<String, Object>();
 		
-		AnalysisVO analysis = new AnalysisVO(jobId, type, resulType, inputFileNames, params);
-		
+		analysis = new AnalysisVO(jobId, type, resulType, inputFileNames, params);
+	}
+	
+	@Test
+	public void testAnalysis() {
+ 
 		try {
-			
 			AnalysisWrapper algorithm = analysis.getType().getWrapper().getConstructor(AnalysisVO.class).newInstance(analysis);
 			
 			algorithm.defineInputParameters();
@@ -68,15 +77,11 @@ public class MainAnalysisTest {
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		} catch (AnalysisExecutionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (AnalysisParameterException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		
-		
+		Assert.assertTrue(analysis.isSucess());
 	}
-
 }

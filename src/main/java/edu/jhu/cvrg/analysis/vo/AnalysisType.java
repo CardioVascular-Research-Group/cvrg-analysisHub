@@ -17,8 +17,8 @@ import edu.jhu.cvrg.analysis.wrapper.wfdb.WqrsAnalysis;
 
 public enum AnalysisType {
 
-	ANN2RR("ann2rr", 					"ann2rrWrapperType2", 		Ann2rrAnalysis.class,	SqrsAnalysis.class),
-	NGUESS("nguess", 					"nguessWrapperType2", 		NguessAnalysis.class, 	SqrsAnalysis.class),
+	ANN2RR("ann2rr", 					"ann2rrWrapperType2", 		Ann2rrAnalysis.class,	null),
+	NGUESS("nguess", 					"nguessWrapperType2", 		NguessAnalysis.class, 	null),
 	PNNLIST("pnnlist/pNNx",			 	"pnnlistWrapperType2", 		PnnlistAnalysis.class,	null),
 	RDSAMP("rdsamp", 					"rdsampWrapperType2", 		RdsampAnalysis.class, 	null),
 	SIGAAMP("sigamp", 					"sigampWrapperType2", 		SigampAnalysis.class, 	null),
@@ -26,7 +26,7 @@ public enum AnalysisType {
 	SQRS4IHR("sqrs4ihr", 				"sqrs4ihrWrapperType2", 	IhrAnalysis.class, 		SqrsAnalysis.class),
 	SQRS4PNNLIST("sqrs4pnnlist/pNNx", 	"sqrs4pnnlistWrapperType2",	PnnlistAnalysis.class, 	SqrsAnalysis.class),
 	IHR("sqrs4ihr", 					"sqrs4ihrWrapperType2", 	IhrAnalysis.class, 		null),
-	TACH("tach", 						"tachWrapperType2", 		TachAnalysis.class, 	SqrsAnalysis.class),
+	TACH("tach", 						"tachWrapperType2", 		TachAnalysis.class, 	null),
 	WQRS("wqrs", 						"wqrsWrapperType2", 		WqrsAnalysis.class, 	null),
 	WQRS4IHR("wqrs4ihr", 				"wqrs4ihrWrapperType2", 	IhrAnalysis.class, 		WqrsAnalysis.class),
 	WQRS4PNNLIST("wqrs4pnnlist/pNNx", 	"wqrs4pnnlistWrapperType2",	PnnlistAnalysis.class, 	WqrsAnalysis.class),

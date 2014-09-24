@@ -107,11 +107,11 @@ public class QRS_Score {
 	public int No_scode = 2;  //
 	public ArrayList<Integer> scode = new ArrayList<Integer>();
 
-	public int positiveError;
-	public int negativeError;
-	public int badParameterCount;
+	public int positiveError = 0;
+	public int negativeError = 0;
+	public int badQParameterCount = 0, badRParameterCount = 0, badSParameterCount = 0, badOtherParameterCount=0;
 	/** Slash separated list of parameters with a value of zero(invalid) **/
-	public String missingParamList = "";	
+	public String missingQParamList = "",  missingRParamList = "",  missingSParamList = "", missingOtherParameterList = "";	
 	//Thresholds:
 	private Map<String, Double> mapThreshold = new HashMap<String, Double>();
 	
@@ -125,7 +125,6 @@ public class QRS_Score {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Thresholds used (all 32 bit floating point):\n");
 		
-		int i=0;
 		for (Map.Entry<String, Double> e : mapThreshold.entrySet()){
 			sb.append(e.getKey());
 			sb.append("  ");
@@ -701,7 +700,7 @@ public class QRS_Score {
 			default:
 				QRS_Score = -1;
 		}
-		badParameterCount = CountMissingParameters();
+		int badParameterCount = CountMissingParameters();
 		positiveError = CalculatePositiveErrorPoints();
 		negativeError = CalculateNegativeErrorPoints();
 		return QRS_Score;
@@ -1279,12 +1278,31 @@ public class QRS_Score {
 		return QRS_Score;
 	}
 
-	/** Run all the calculations for RBBB.
+	/** Run all the calculations for LBBB.
 	 * set all the public sub-totals, and final result. 
 	 * @return QRS_score;
 	 */
 	public int calculateQRS_score_LBBB(){
 		CalculateRatios();
+//		points_I = calcLead_I_LBBB();
+//		points_II= calcLead_II_LBBB();
+		points_I = calcLead_I();
+		points_II= calcLead_II();
+		points_aVL=calcLead_aVL();
+		points_aVF=calcLead_aVF();
+		points_V1ant=calcLead_V1ant();
+		points_V1post=calcLead_V1post();
+		points_V2ant=calcLead_V2ant();
+		points_V2post=calcLead_V2post();
+		points_V3=calcLead_V3();
+		points_V4=calcLead_V4();
+		points_V5=calcLead_V5();
+		points_V6=calcLead_V6();
+
+		//--------------------
+		QRS_Score=points_I+points_II+points_aVL+points_aVF+points_V1ant+points_V1post+points_V2ant+points_V2post+points_V3+points_V4+points_V5+points_V6;  //=points_I+points_II+points_aVL+points_aVF+points_V1ant+points_V1post+points_V2ant+points_V2post+points_V3+points_V4+points_V5+points_V6
+
+		debugPrintValues();
 		return QRS_Score;
 	}
 
@@ -1637,52 +1655,61 @@ public class QRS_Score {
 		RSra_V6  = (sa_V6==0) ? 9999999: ra_V6/sa_V6;  //  =IF(sa_V6=0,"",ra_V6/sa_V6)
 	}
 	
-	/** Counts the parameters which have an invalid value of zero and creates a "/" separated list of them **/
+	/** Counts the parameters which have an invalid value of zero and creates a "/" separated list of them.
+	 * Creates separate lists and counts for Q,R,S and other parameters. **/
 	private int CountMissingParameters(){
 		int count = 0;
+		badQParameterCount = 0;
+		badRParameterCount = 0;
+		badSParameterCount = 0;
+		badOtherParameterCount = 0;
 		
+		missingQParamList = "";
+		missingRParamList = "";
+		missingSParamList = "";
+		missingOtherParameterList = "";
 		if(qa_I==0){ 
-			missingParamList += "qa_I/";
-			count++;
+			missingQParamList += "qa_I/";
+			badQParameterCount++;
 		}
-		if(qa_aVL==0) {  missingParamList += "qa_aVL/";count++; }
-		if(qa_aVF==0) {  missingParamList += "qa_aVF/";count++; }
-		if(qa_V1==0)  {  missingParamList += "qa_V1/"; count++; }
-		if(qa_V2==0)  {  missingParamList += "qa_V2/"; count++; }
-		if(qa_V3==0)  {  missingParamList += "qa_V3/"; count++; }
-		if(qa_V4==0)  {  missingParamList += "qa_V4/"; count++; }
-		if(qa_V5==0)  {  missingParamList += "qa_V5/"; count++; }
-		if(qa_V6==0)  {  missingParamList += "qa_V6/"; count++; }
-		if(qd_I==0)   {  missingParamList += "qd_I/";  count++; }
-		if(qd_II==0)  {  missingParamList += "qd_II/"; count++; }
-		if(qd_aVL==0) {  missingParamList += "qd_aVL/";count++; }
-		if(qd_aVF==0) {  missingParamList += "qd_aVF/";count++; }
-		if(qd_V1==0)  {  missingParamList += "qd_V1/"; count++; }
-		if(qd_V2==0)  {  missingParamList += "qd_V2/"; count++; }
-		if(qd_V3==0)  {  missingParamList += "qd_V3/"; count++; }
-		if(qd_V4==0)  {  missingParamList += "qd_V4/"; count++; }
-		if(qd_V5==0)  {  missingParamList += "qd_V5/"; count++; }
-		if(qd_V6==0)  {  missingParamList += "qd_V6/"; count++; }
-		if(ra_I==0)   {  missingParamList += "ra_I/";  count++; }
-		if(ra_aVL==0) {  missingParamList += "ra_aVL/";count++; }
-		if(ra_aVF==0) {  missingParamList += "ra_aVF/";count++; }
-		if(ra_V1==0)  {  missingParamList += "ra_V1/"; count++; }
-		if(ra_V2==0)  {  missingParamList += "ra_V2/"; count++; }
-		if(ra_V3==0)  {  missingParamList += "ra_V3/"; count++; }
-		if(ra_V4==0)  {  missingParamList += "ra_V4/"; count++; }
-		if(ra_V5==0)  {  missingParamList += "ra_V5/"; count++; }
-		if(ra_V6==0)  {  missingParamList += "ra_V6/"; count++; }
-		if(rd_V1==0)  {  missingParamList += "rd_V1/"; count++; }
-		if(rd_V2==0)  {  missingParamList += "rd_V2/"; count++; }
-		if(rd_V3==0)  {  missingParamList += "rd_V3/"; count++; }
-		if(sa_V1==0)  {  missingParamList += "sa_V1/"; count++; }
-		if(sa_V2==0)  {  missingParamList += "sa_V2/"; count++; }
-		if(sa_V3==0)  {  missingParamList += "sa_V3/"; count++; }
-		if(sa_V4==0)  {  missingParamList += "sa_V4/"; count++; }
-		if(sa_V5==0)  {  missingParamList += "sa_V5/"; count++; }
-		if(sa_V6==0)  {  missingParamList += "sa_V6/"; count++; }
+		if(qa_aVL==0) {  missingQParamList += "qa_aVL/";badQParameterCount++; }
+		if(qa_aVF==0) {  missingQParamList += "qa_aVF/";badQParameterCount++; }
+		if(qa_V1==0)  {  missingQParamList += "qa_V1/"; badQParameterCount++; }
+		if(qa_V2==0)  {  missingQParamList += "qa_V2/"; badQParameterCount++; }
+		if(qa_V3==0)  {  missingQParamList += "qa_V3/"; badQParameterCount++; }
+		if(qa_V4==0)  {  missingQParamList += "qa_V4/"; badQParameterCount++; }
+		if(qa_V5==0)  {  missingQParamList += "qa_V5/"; badQParameterCount++; }
+		if(qa_V6==0)  {  missingQParamList += "qa_V6/"; badQParameterCount++; }
+		if(qd_I==0)   {  missingQParamList += "qd_I/";  badQParameterCount++; }
+		if(qd_II==0)  {  missingQParamList += "qd_II/"; badQParameterCount++; }
+		if(qd_aVL==0) {  missingQParamList += "qd_aVL/";badQParameterCount++; }
+		if(qd_aVF==0) {  missingQParamList += "qd_aVF/";badQParameterCount++; }
+		if(qd_V1==0)  {  missingQParamList += "qd_V1/"; badQParameterCount++; }
+		if(qd_V2==0)  {  missingQParamList += "qd_V2/"; badQParameterCount++; }
+		if(qd_V3==0)  {  missingQParamList += "qd_V3/"; badQParameterCount++; }
+		if(qd_V4==0)  {  missingQParamList += "qd_V4/"; badQParameterCount++; }
+		if(qd_V5==0)  {  missingQParamList += "qd_V5/"; badQParameterCount++; }
+		if(qd_V6==0)  {  missingQParamList += "qd_V6/"; badQParameterCount++; }
+		if(ra_I==0)   {  missingRParamList += "ra_I/";  badRParameterCount++; }
+		if(ra_aVL==0) {  missingRParamList += "ra_aVL/";badRParameterCount++; }
+		if(ra_aVF==0) {  missingRParamList += "ra_aVF/";badRParameterCount++; }
+		if(ra_V1==0)  {  missingRParamList += "ra_V1/"; badRParameterCount++; }
+		if(ra_V2==0)  {  missingRParamList += "ra_V2/"; badRParameterCount++; }
+		if(ra_V3==0)  {  missingRParamList += "ra_V3/"; badRParameterCount++; }
+		if(ra_V4==0)  {  missingRParamList += "ra_V4/"; badRParameterCount++; }
+		if(ra_V5==0)  {  missingRParamList += "ra_V5/"; badRParameterCount++; }
+		if(ra_V6==0)  {  missingRParamList += "ra_V6/"; badRParameterCount++; }
+		if(rd_V1==0)  {  missingRParamList += "rd_V1/"; badRParameterCount++; }
+		if(rd_V2==0)  {  missingRParamList += "rd_V2/"; badRParameterCount++; }
+		if(rd_V3==0)  {  missingRParamList += "rd_V3/"; badRParameterCount++; }
+		if(sa_V1==0)  {  missingSParamList += "sa_V1/"; badSParameterCount++; }
+		if(sa_V2==0)  {  missingSParamList += "sa_V2/"; badSParameterCount++; }
+		if(sa_V3==0)  {  missingSParamList += "sa_V3/"; badSParameterCount++; }
+		if(sa_V4==0)  {  missingSParamList += "sa_V4/"; badSParameterCount++; }
+		if(sa_V5==0)  {  missingSParamList += "sa_V5/"; badSParameterCount++; }
+		if(sa_V6==0)  {  missingSParamList += "sa_V6/"; badSParameterCount++; }
 
-
+		count = badQParameterCount + badRParameterCount + badSParameterCount;
 
 		return count;
 	}

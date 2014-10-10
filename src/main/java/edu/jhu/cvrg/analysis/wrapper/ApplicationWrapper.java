@@ -271,9 +271,25 @@ public abstract class ApplicationWrapper extends AnalysisWrapper {
 	    debugPrintln("Here is the standard error of the command (if any): \"");
         while ((error = stdError.readLine()) != null) {
         	if(error.length() > 0){
-	        	log.error(lineNum + ">" + error);
+        		
+        		switch (this.getAnalysisVO().getType()) {
+				case RDSAMP:
+				case SQRS:
+					
+					if(!error.contains("checksum error in signal")){
+						bRet = false;	
+					}
+					
+					break;
+
+				default:
+					bRet = false;
+					break;
+				}
+        		
+        		log.error(lineNum + ">" + error);
 	            lineNum++;
-				bRet = false;
+				
         	}
         }
         debugPrintln("\"");

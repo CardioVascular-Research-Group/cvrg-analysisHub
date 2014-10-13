@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 public class ServiceProperties {
 	
 	private static String PROPERTIES_PATH = "/conf/service.properties";
@@ -14,10 +16,16 @@ public class ServiceProperties {
 	private static File propertiesFile = null;
 	private static long lastChange = 0;
 	
-
+	private static Logger log = Logger.getLogger(ServiceProperties.class);
+	
 	private ServiceProperties() {
 		prop = new Properties();
-		propertiesFile = new File(System.getProperty("catalina.home")+PROPERTIES_PATH);
+		String catalinaHome = System.getProperty("catalina.home");
+		if(catalinaHome == null){
+			catalinaHome = "/opt/liferay/waveform3/tomcat-7.0.27";
+			log.error("catalina.home not found, using the default value \""+catalinaHome+"\"");
+		}
+		propertiesFile = new File(catalinaHome+PROPERTIES_PATH);
 		loadProperties();
 	}
 	

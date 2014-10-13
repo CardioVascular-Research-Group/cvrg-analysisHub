@@ -115,7 +115,7 @@ public class PnnlistAnalysis extends AnnotationBasedAnalysisWrapper{
 					this.setJSONOutput();
 					break;
 				default:
-					break;
+					throw new AnalysisExecutionException("Unexpected output format ["+this.getAnalysisVO().getResultType()+"] for this analysis ["+this.getAnalysisVO().getType()+"]");
 				}
 				
 			}else{

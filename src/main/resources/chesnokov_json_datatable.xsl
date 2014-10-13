@@ -198,7 +198,75 @@
 						<xsl:text>"</xsl:text>
 					</xsl:otherwise>
 				</xsl:choose>
-			 	<xsl:text>},</xsl:text>
+				
+				<xsl:text>, "http://purl.bioontology.org/ontology/ECGT/ECGTermsv1:ECG_000001103|Heart Rate Interval Count" : </xsl:text>
+			 	<xsl:choose>
+					<xsl:when test="number(../HRIntervalResults/Heart_Rate_Count) = ../HRIntervalResults/Heart_Rate_Count">
+						<xsl:value-of select="../HRIntervalResults/Heart_Rate_Count"/> 
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text>"</xsl:text>
+						<xsl:value-of select="../HRIntervalResults/Heart_Rate_Count"/>
+						<xsl:text>"</xsl:text>
+					</xsl:otherwise>
+				</xsl:choose>
+				
+				<xsl:text>, "http://purl.bioontology.org/ontology/ECGT/ECGTermsv1:ECG_000001099|Heart Rate Mean" : </xsl:text>
+			 	<xsl:choose>
+					<xsl:when test="number(../HRIntervalResults/Heart_Rate_Mean) = ../HRIntervalResults/Heart_Rate_Mean">
+						<xsl:value-of select="../HRIntervalResults/Heart_Rate_Mean"/> 
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text>"</xsl:text>
+						<xsl:value-of select="../HRIntervalResults/Heart_Rate_Mean"/>
+						<xsl:text>"</xsl:text>
+					</xsl:otherwise>
+				</xsl:choose>
+				<xsl:text>, "http://purl.bioontology.org/ontology/ECGT/ECGTermsv1:ECG_000001100|Heart Rate Min" : </xsl:text>
+			 	<xsl:choose>
+					<xsl:when test="number(../HRIntervalResults/Heart_Rate_Minimum) = ../HRIntervalResults/Heart_Rate_Minimum">
+						<xsl:value-of select="../HRIntervalResults/Heart_Rate_Minimum"/> 
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text>"</xsl:text>
+						<xsl:value-of select="../HRIntervalResults/Heart_Rate_Minimum"/>
+						<xsl:text>"</xsl:text>
+					</xsl:otherwise>
+				</xsl:choose>
+				<xsl:text>, "http://purl.bioontology.org/ontology/ECGT/ECGTermsv1:ECG_000001098|Heart Rate Max" : </xsl:text>
+			 	<xsl:choose>
+					<xsl:when test="number(../HRIntervalResults/Heart_Rate_Maximum) = ../HRIntervalResults/Heart_Rate_Maximum">
+						<xsl:value-of select="../HRIntervalResults/Heart_Rate_Maximum"/> 
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text>"</xsl:text>
+						<xsl:value-of select="../HRIntervalResults/Heart_Rate_Maximum"/>
+						<xsl:text>"</xsl:text>
+					</xsl:otherwise>
+				</xsl:choose>
+				<xsl:text>, "http://purl.bioontology.org/ontology/ECGT/ECGTermsv1:ECG_000001101|Heart Rate Variance" : </xsl:text>
+			 	<xsl:choose>
+					<xsl:when test="number(../HRIntervalResults/Heart_Rate_Variance) = ../HRIntervalResults/Heart_Rate_Variance">
+						<xsl:value-of select="../HRIntervalResults/Heart_Rate_Variance"/> 
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text>"</xsl:text>
+						<xsl:value-of select="../HRIntervalResults/Heart_Rate_Variance"/>
+						<xsl:text>"</xsl:text>
+					</xsl:otherwise>
+				</xsl:choose>
+				<xsl:text>, "http://purl.bioontology.org/ontology/ECGT/ECGTermsv1:ECG_000001102|Heart Rate Standard Deviation" : </xsl:text>
+			 	<xsl:choose>
+					<xsl:when test="number(../HRIntervalResults/Heart_Rate_Standard_Deviation) = ../HRIntervalResults/Heart_Rate_Standard_Deviation">
+						<xsl:value-of select="../HRIntervalResults/Heart_Rate_Standard_Deviation"/> 
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text>"</xsl:text>
+						<xsl:value-of select="../HRIntervalResults/Heart_Rate_Standard_Deviation"/>
+						<xsl:text>"</xsl:text>
+					</xsl:otherwise>
+				</xsl:choose>
+				<xsl:text>},</xsl:text>
 			 </xsl:for-each>
 			 <xsl:text>]}</xsl:text>
 		</html>

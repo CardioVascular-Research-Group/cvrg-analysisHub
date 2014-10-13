@@ -153,8 +153,7 @@ public class RdsampAnalysis extends ApplicationWrapper{
 						break;
 					case JSON_DATA:
 						//TODO To be defined
-						
-						debugPrintln("- To be defined");
+						throw new AnalysisExecutionException("Not implemented yet! To be defined \n Unexpected output format ["+this.getAnalysisVO().getResultType()+"] for this analysis ["+this.getAnalysisVO().getType()+"]");
 						
 //						String jsonData = this.stdJSONReturnHandler(null);
 //						bRet &= this.stdErrorHandler();
@@ -165,7 +164,6 @@ public class RdsampAnalysis extends ApplicationWrapper{
 //						}else{
 //							debugPrintln("- Encountered errors.");
 //						}
-						break;
 				}
 			}else{
 				throw new AnalysisExecutionException("Command execution error. ["+ command+"]");

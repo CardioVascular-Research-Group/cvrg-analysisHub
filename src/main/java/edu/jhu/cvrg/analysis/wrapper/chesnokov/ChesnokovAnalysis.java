@@ -272,6 +272,11 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 	private String extractXmlData(String chesnokovFilename,	String fileAnalyzedTempName, String outputFileName) {
 		String xhtml = null;
 		String[] chesSigalNameArray = {"I","II","III","aVR","aVL","aVF","v1","v2","v3","v4","v5","v6"};
+		
+		if(signalNameList.size() > 12){
+			chesSigalNameArray = new String[]{"I","II","III","aVR","aVL","aVF","v1","v2","v3","v4","v5","v6", "vx", "vy", "vz"};
+		}
+		
 		Document xmlDoc = null;
 		Document transformed = null;
 		InputStream xsltIS = null;
@@ -295,9 +300,9 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 			}
 			xmlDoc = build(str);
 			if(AnalysisResultType.JSON_DATA.equals(this.getAnalysisVO().getResultType())){
-				xsltIS = this.getClass().getResourceAsStream("chesnokov_json_datatable.xsl");	
+				xsltIS = this.getClass().getResourceAsStream("/chesnokov_json_datatable.xsl");	
 			}else{
-				xsltIS = this.getClass().getResourceAsStream("chesnokov_datatable.xsl");
+				xsltIS = this.getClass().getResourceAsStream("/chesnokov_datatable.xsl");
 			}
 			xslTransformer = new XSLTransformer(xsltIS);
 			transformed = xslTransformer.transform(xmlDoc);

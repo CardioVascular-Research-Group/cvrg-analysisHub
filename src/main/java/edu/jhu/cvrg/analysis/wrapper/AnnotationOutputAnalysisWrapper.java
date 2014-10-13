@@ -45,7 +45,7 @@ public abstract class AnnotationOutputAnalysisWrapper extends ApplicationWrapper
 			
 			switch (format) {
 				case CSV_FILE:
-					String outputFile = stdCSVReturnHandler(path, sRecord + '_'+ this.getAnalysisVO().getJobId(), this.getDataHeaders());
+					String outputFile = stdCSVReturnHandler(path, sRecord + '_'+ this.getAnalysisVO().getJobIdNumber(), this.getDataHeaders());
 					
 					List<String> outputFilenames = new ArrayList<String>();
 					
@@ -92,7 +92,7 @@ public abstract class AnnotationOutputAnalysisWrapper extends ApplicationWrapper
 				case ORIGINAL_FILE:
 					List<String> outputFilenames = new ArrayList<String>();
 					if(this.getAnalysisVO().isRename()){
-						String finalName = path + record + '_'+ this.getAnalysisVO().getJobId() + "." + this.getAnnotationExt() ;
+						String finalName = path + record + '_'+ this.getAnalysisVO().getJobIdNumber() + "." + this.getAnnotationExt() ;
 						originFile.renameTo(new File(finalName));
 						outputFilenames.add(finalName);
 					}else{

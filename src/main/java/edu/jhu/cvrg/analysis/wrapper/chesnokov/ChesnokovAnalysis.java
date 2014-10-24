@@ -21,16 +21,15 @@ import org.jdom.output.XMLOutputter;
 import org.jdom.transform.XSLTransformException;
 import org.jdom.transform.XSLTransformer;
 
+import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.util.AnalysisParameterException;
 import edu.jhu.cvrg.analysis.util.AnalysisUtils;
-import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.util.ServiceProperties;
 import edu.jhu.cvrg.analysis.vo.AnalysisResultType;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
 import edu.jhu.cvrg.analysis.wrapper.AnalysisWrapper;
 import edu.jhu.cvrg.analysis.wrapper.ApplicationWrapper;
-import edu.jhu.cvrg.converter.ECGformatConverter;
-import edu.jhu.cvrg.converter.vo.ECGFormat;
+import edu.jhu.icm.ecgFormatConverter.ECGformatConverter;
 
 public class ChesnokovAnalysis extends ApplicationWrapper {
 	
@@ -235,7 +234,7 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 		ECGformatConverter con= new ECGformatConverter();
 		int signalsRequested = 0; // zero requests all signals found.
 		
-		con.convert(ECGFormat.WFDB, ECGFormat.WFDB_16, inputFile, signalsRequested, path, path);
+		con.convert(ECGformatConverter.fileFormat.WFDB, ECGformatConverter.fileFormat.WFDB_16, inputFile, signalsRequested, path, path);
 	}
 	
 	/** Converts the Chesnokov output file (XML) into a CSV format.

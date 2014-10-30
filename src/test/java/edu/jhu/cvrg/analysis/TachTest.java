@@ -1,8 +1,6 @@
 package edu.jhu.cvrg.analysis;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -22,13 +20,9 @@ public class TachTest extends TestBase{
  
 		AnalysisResultType resulType = AnalysisResultType.ORIGINAL_FILE;
 		
-		List<String> inputFileNames = new ArrayList<String>();
-		inputFileNames.add("/home/avilard4/testAnalysis/twa01.hea");
-		inputFileNames.add("/home/avilard4/testAnalysis/twa01.dat");
-		
 		Map<String, Object> params = new HashMap<String, Object>();
 		
-		AnalysisVO analysis = new AnalysisVO(String.valueOf(this.getJobId()), AnalysisType.SQRS, AnalysisResultType.ORIGINAL_FILE, inputFileNames, params);
+		AnalysisVO analysis = new AnalysisVO(String.valueOf(this.getJobId()), AnalysisType.SQRS, AnalysisResultType.ORIGINAL_FILE, this.getInputFiles(), params);
 		
 		analysis.setRename(false);
 		
@@ -47,7 +41,6 @@ public class TachTest extends TestBase{
 			
 			algorithm.defineInputParameters();
 			algorithm.execute();
-			
 			
 		} catch (Exception e) {
 			System.err.println(e.getMessage());

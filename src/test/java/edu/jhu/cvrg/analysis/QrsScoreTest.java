@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
-import org.junit.Test;
 
 import edu.jhu.cvrg.analysis.vo.AnalysisResultType;
 import edu.jhu.cvrg.analysis.vo.AnalysisType;
@@ -23,13 +22,9 @@ public class QrsScoreTest extends TestBase{
 		
 		AnalysisResultType resulType = AnalysisResultType.JSON_DATA;
 		
-		List<String> inputFileNames = new ArrayList<String>();
-		inputFileNames.add("/home/avilard4/testAnalysis/twa01.hea");
-		inputFileNames.add("/home/avilard4/testAnalysis/twa01.dat");
-		
 		Map<String, Object> params = new HashMap<String, Object>();
 		
-		AnalysisVO analysis = new AnalysisVO(String.valueOf(this.getJobId()), type, resulType, inputFileNames, params);
+		AnalysisVO analysis = new AnalysisVO(String.valueOf(this.getJobId()), type, resulType, this.getInputFiles(), params);
 		
 		try {
 			
@@ -54,13 +49,9 @@ public class QrsScoreTest extends TestBase{
  
 		AnalysisResultType resulType = AnalysisResultType.CSV_FILE;
 		
-		List<String> inputFileNames = new ArrayList<String>();
-		inputFileNames.add("/home/avilard4/testAnalysis/twa01.hea");
-		inputFileNames.add("/home/avilard4/testAnalysis/twa01.dat");
-		
 		Map<String, Object> params = new HashMap<String, Object>();
 		
-		AnalysisVO analysis = new AnalysisVO(String.valueOf(this.getJobId()), type, resulType, inputFileNames, params);
+		AnalysisVO analysis = new AnalysisVO(String.valueOf(this.getJobId()), type, resulType, this.getInputFiles(), params);
 		
 		try {
 			

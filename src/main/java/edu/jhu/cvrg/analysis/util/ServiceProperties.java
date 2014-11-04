@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -17,16 +18,33 @@ public class ServiceProperties {
 	private static long lastChange = 0;
 	
 	private static Logger log = Logger.getLogger(ServiceProperties.class);
+	private boolean isTest = false;
 	
 	private ServiceProperties() {
 		prop = new Properties();
 		String catalinaHome = System.getProperty("catalina.home");
+		InputStream testProperties = null;
+		
 		if(catalinaHome == null){
 			catalinaHome = "/opt/liferay/waveform3/tomcat-7.0.27";
 			log.error("catalina.home not found, using the default value \""+catalinaHome+"\"");
 		}
-		propertiesFile = new File(catalinaHome+PROPERTIES_PATH);
-		loadProperties();
+		
+		testProperties = this.getClass().getResourceAsStream("/test.properties");
+		if(testProperties == null){
+			propertiesFile = new File(catalinaHome+PROPERTIES_PATH);
+			loadProperties();
+		}else{
+			try {
+				prop.load(testProperties);
+				isTest = true;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		
 	}
 	
 	public static ServiceProperties getInstance(){
@@ -43,7 +61,7 @@ public class ServiceProperties {
 	
 	private void loadProperties(){
 		try {
-			if(propertiesFile.lastModified() > lastChange){
+			if(!isTest && propertiesFile.lastModified() > lastChange){
 				prop.clear();
 				prop.load(new FileReader(propertiesFile));
 				lastChange = propertiesFile.lastModified();

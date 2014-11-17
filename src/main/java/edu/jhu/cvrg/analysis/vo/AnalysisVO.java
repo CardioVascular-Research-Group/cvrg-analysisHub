@@ -23,6 +23,8 @@ public class AnalysisVO {
 	//By default we have to rename the output file to identify the analysis job 
 	private boolean rename = true;
 	
+	private String tempFolder;
+	
 	public AnalysisVO(String jobId, AnalysisType type, AnalysisResultType resultType, List<String> inputFileNames, Map<String, Object> commandParamMap) {
 		super();
 		this.jobId = jobId;
@@ -98,6 +100,14 @@ public class AnalysisVO {
 
 	public void setOutputData(String outputData) {
 		this.outputData = outputData;
+	}
+
+	public String getTempFolder() {
+		return tempFolder;
+	}
+
+	public void setTempFolder(String tempFolder) {
+		this.tempFolder = tempFolder;
 	}
 
 }

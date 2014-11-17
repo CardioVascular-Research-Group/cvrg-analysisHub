@@ -154,7 +154,7 @@ public class TachAnalysis extends AnnotationBasedAnalysisWrapper {
 		// (path + filename) must have 33 characters at maximum 
 		String finalPathName = path + outputFile;
 		String tempName = RandomString.newString(5);
-		String tempPathName = AnalysisUtils.SERVER_TEMP_ANALYSIS_FOLDER + File.separator + tempName;
+		String tempPathName = this.getAnalysisVO().getTempFolder() + File.separator + tempName;
 		
 		command += " -o " + tempPathName;
 		

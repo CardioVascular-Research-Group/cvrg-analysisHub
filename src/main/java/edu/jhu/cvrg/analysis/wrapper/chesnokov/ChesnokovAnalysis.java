@@ -24,7 +24,6 @@ import org.jdom.transform.XSLTransformer;
 import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.util.AnalysisParameterException;
 import edu.jhu.cvrg.analysis.util.AnalysisUtils;
-import edu.jhu.cvrg.analysis.util.ServiceProperties;
 import edu.jhu.cvrg.analysis.vo.AnalysisResultType;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
 import edu.jhu.cvrg.analysis.wrapper.AnalysisWrapper;
@@ -33,6 +32,9 @@ import edu.jhu.icm.ecgFormatConverter.ECGformatConverter;
 
 public class ChesnokovAnalysis extends ApplicationWrapper {
 	
+	private static final String WINE_COMMAND = "wine";
+	private static final String CHESNOKOV_COMMAND = "autoqrs/Release/ecg.exe";
+	private static final String CHESNOKOV_FILTERS = "autoqrs/Release/filters/";
 	
 	private String inputFile; 
 	private String path; 
@@ -83,17 +85,16 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 				reformatRecordToF16( inputFile,  path);
 			}
 			
+			int folderLevel = path.split("/").length - 2 /* /opt/ */;
+			String folderUp = "";
+			for (int i = 0; i < folderLevel; i++) {
+				folderUp+="../";
+			}
+			
 			// execute Chesnokov analysis.
 			String chesnokovOutputFilenameXml = inputFile.substring(0, inputFile.lastIndexOf(".") + 1) + "xml";
 
-			ServiceProperties prop = ServiceProperties.getInstance();
-
-			String wineCommand = prop.getProperty(ServiceProperties.WINE_COMMAND);	
-			
-			String chesnokovComand = prop.getProperty(ServiceProperties.CHESNOKOV_COMMAND);
-			String chesnokovFilters = prop.getProperty(ServiceProperties.CHESNOKOV_FILTERS);
-			
-			String command = wineCommand + " " + chesnokovComand + " " + chesnokovFilters + " " + inputFile + " " + chesnokovOutputFilenameXml; // add parameters for "input file" and "output file"
+			String command = WINE_COMMAND + " " + folderUp + CHESNOKOV_COMMAND + " " + folderUp + CHESNOKOV_FILTERS + " " + inputFile + " " + chesnokovOutputFilenameXml; // add parameters for "input file" and "output file"
 
 			bRet = executeCommand(command, envVar, path);
 			

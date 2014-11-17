@@ -10,8 +10,6 @@ public class AnalysisUtils {
 
 	private static final Logger log = Logger.getLogger(AnalysisUtils.class);
 	
-	public static final String SERVER_TEMP_ANALYSIS_FOLDER = ServiceProperties.getInstance().getProperty(ServiceProperties.TEMP_FOLDER)+"/a";
-	
 	public static String sep = File.separator;
 	
 	/** Find the first filename in the array with the "hea" extension.

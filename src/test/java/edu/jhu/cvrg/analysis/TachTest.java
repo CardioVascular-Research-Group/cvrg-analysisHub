@@ -24,6 +24,8 @@ public class TachTest extends TestBase{
 		
 		AnalysisVO analysis = new AnalysisVO(String.valueOf(this.getJobId()), AnalysisType.SQRS, AnalysisResultType.ORIGINAL_FILE, this.getInputFiles(), params);
 		
+		analysis.setTempFolder(TEST_FILE_PATH);
+		
 		analysis.setRename(false);
 		
 		try {

@@ -17,8 +17,5 @@
   <classpathentry kind="var" path="M2_REPO/org/apache/xmlbeans/xmlbeans/2.4.0/xmlbeans-2.4.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/stax/stax-api/1.0.1/stax-api-1.0.1.jar"/>
   <classpathentry kind="var" path="M2_REPO/pcj/pcj/1.2/pcj-1.2.jar"/>
-  <classpathentry kind="src" path="/jsierraecg"/>
-  <classpathentry kind="src" path="/Phlilips1.04"/>
-  <classpathentry kind="src" path="/schiller-data"/>
   <classpathentry kind="var" path="M2_REPO/hl7OrgV3/aecg/1.0/aecg-1.0.jar"/>
 </classpath>

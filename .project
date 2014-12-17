@@ -4,9 +4,6 @@
   <comment>NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
   <projects>
     <project>ECG_Converter4</project>
-    <project>jsierraecg</project>
-    <project>Phlilips1.04</project>
-    <project>schiller-data</project>
   </projects>
   <buildSpec>
     <buildCommand>

@@ -38,6 +38,7 @@ public class TachTest extends TestBase{
 			analysis.getFileNames().addAll(analysis.getOutputFileNames());
 			
 			analysis = new AnalysisVO(String.valueOf(this.getJobId()), type, resulType, analysis.getFileNames(), params);
+			analysis.setTempFolder(TEST_FILE_PATH);
 			
 			algorithm = analysis.getType().getWrapper().getConstructor(AnalysisVO.class).newInstance(analysis);
 			

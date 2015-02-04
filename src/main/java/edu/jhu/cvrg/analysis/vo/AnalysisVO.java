@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.jhu.cvrg.analysis.util.AnalysisUtils;
+
 public class AnalysisVO {
 
 	private String jobId;
@@ -13,6 +15,7 @@ public class AnalysisVO {
 	
 	private List<String> inputFileNames;
 	private Map<String, Object> commandParamMap;
+	private String recordName;
 	
 	private String outputData;
 	private List<String> outputFileNames;
@@ -31,6 +34,14 @@ public class AnalysisVO {
 		this.type = type;
 		this.resultType = resultType;
 		this.inputFileNames = inputFileNames;
+		
+		if(inputFileNames != null && inputFileNames.size()>0){
+			String filename = AnalysisUtils.extractName(inputFileNames.get(0));
+			int iIndexPeriod = filename.lastIndexOf(".");
+			recordName = filename.substring(0, iIndexPeriod);
+		}
+		
+		
 		if(commandParamMap == null){
 			this.commandParamMap = new HashMap<String, Object>();
 		}else{
@@ -110,4 +121,11 @@ public class AnalysisVO {
 		this.tempFolder = tempFolder;
 	}
 
+	public String getRecordName(){
+		return recordName;
+	}
+
+	public void setRecordName(String recordName) {
+		this.recordName = recordName;
+	}
 }

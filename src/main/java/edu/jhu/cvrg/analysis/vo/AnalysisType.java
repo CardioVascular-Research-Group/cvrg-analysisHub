@@ -3,6 +3,7 @@ package edu.jhu.cvrg.analysis.vo;
 import edu.jhu.cvrg.analysis.wrapper.AnalysisWrapper;
 import edu.jhu.cvrg.analysis.wrapper.AnnotationOutputAnalysisWrapper;
 import edu.jhu.cvrg.analysis.wrapper.chesnokov.ChesnokovAnalysis;
+import edu.jhu.cvrg.analysis.wrapper.chesnokov.ChesnokovAnalysisUnix;
 import edu.jhu.cvrg.analysis.wrapper.qrsScore.QrsScoreAnalysis;
 import edu.jhu.cvrg.analysis.wrapper.wfdb.Ann2rrAnalysis;
 import edu.jhu.cvrg.analysis.wrapper.wfdb.IhrAnalysis;
@@ -32,6 +33,7 @@ public enum AnalysisType {
 	WQRS4PNNLIST("wqrs4pnnlist/pNNx", 	"wqrs4pnnlistWrapperType2",	PnnlistAnalysis.class, 	WqrsAnalysis.class),
 	WRSAMP("wrsamp", 					"wrsampWrapperType2", 		null, 					null), 
 	CHESNOKOV("QT Screening", 			"chesnokovWrapperType2", 	ChesnokovAnalysis.class,null),
+	CHESNOKOVUNIX("QT Screening", 		"chesnokovWrapperUnixType2", 	ChesnokovAnalysisUnix.class,null),
 	QRS_SCORE("QRS_SCORE", 				"qrs_scoreWrapperType2", 	QrsScoreAnalysis.class,	null);
 	
 	private String name;

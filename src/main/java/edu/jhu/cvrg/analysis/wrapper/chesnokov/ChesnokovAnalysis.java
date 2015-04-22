@@ -49,7 +49,7 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 	
 	@Override
 	protected void _defineInputParameters() throws AnalysisParameterException {
-		log.info("Test point A");
+		log.info("Test point A"); 
 		String sDatPathName = AnalysisUtils.findPathNameExt(this.getAnalysisVO().getFileNames(), "dat");
 		log.info("Test point B");
 		path = AnalysisUtils.extractPath(sDatPathName);

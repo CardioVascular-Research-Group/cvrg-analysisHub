@@ -48,7 +48,7 @@ public class AnalysisUtils {
 	}
 	
 	public static String extractPath(String headerPathName){
-		log.debug("extractPath() from: '" + headerPathName + "'");
+		log.debug("in cvrg-analysisHub, from: '" + headerPathName + "'");
 
 		int indexLastSlash = headerPathName.lastIndexOf("/");
 		
@@ -58,7 +58,7 @@ public class AnalysisUtils {
 	}
 	
 	public static String extractName(String sFilePathName){
-		log.debug("extractName() from: '" + sFilePathName + "'");
+		log.debug("in cvrg-analysisHub, from: '" + sFilePathName + "'");
 
 		int indexLastSlash = sFilePathName.lastIndexOf("/");
 		

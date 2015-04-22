@@ -18,7 +18,7 @@ public class AnalysisUtils {
 	 * @return - full path/name.ext as found in the array.
 	 */
 	public static String findHeaderPathName(List<String> asInputFileNames){
-		log.debug("++ analysisUtils +findHeaderPathName()");
+		log.debug("+findHeaderPathName()");
 		return findPathNameExt(asInputFileNames, "hea");
 	}
 
@@ -29,12 +29,12 @@ public class AnalysisUtils {
 	 * @return - full path/name.ext as found in the array.
 	 */
 	public static String findPathNameExt(List<String> asInputFileNames, String sExtension){
-		log.debug("++ analysisUtils +findHeaderPathName()");
+		log.debug("+findHeaderPathName()");
 		String headerPathName="";
 		int indexPeriod=0;
 		
 		for (String sTemp : asInputFileNames) {
-			log.debug("++ analysisUtils +- asInputFileNames: " + sTemp);
+			log.debug("+- asInputFileNames: " + sTemp);
 			indexPeriod = sTemp.lastIndexOf(".");
 			
 			if( sExtension.contains(sTemp.substring(indexPeriod+1)) ){

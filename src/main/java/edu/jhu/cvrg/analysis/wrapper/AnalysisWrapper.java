@@ -54,7 +54,9 @@ public abstract class AnalysisWrapper {
 	
 	public void execute() throws AnalysisExecutionException{
 		try{
+			log.info("Test point K, execute()");
 			_execute();	
+			log.info("Test point L, after execute()");
 		}catch (AnalysisExecutionException e){
 			log.error(e.getMessage());
 			this.getAnalysisVO().setErrorMessage(e.getMessage());

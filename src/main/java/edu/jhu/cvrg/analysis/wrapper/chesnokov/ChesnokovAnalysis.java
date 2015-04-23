@@ -68,11 +68,11 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 	@Override
 	protected void _execute() throws AnalysisExecutionException {
 		boolean bRet = true;
-		this.debugPrintln("---------------------------");
-		this.debugPrintln("chesnokov()");
-		this.debugPrintln("- inputFile:" + inputFile);
-		this.debugPrintln("- path:" + path);
-		this.debugPrintln("- outputName:" + outputFile);
+		log.info("---------------------------");
+		log.info("chesnokov()");
+		log.info("- inputFile:" + inputFile);
+		log.info("- path:" + path);
+		log.info("- outputName:" + outputFile);
 		// no environment variables are needed, 
 		// this is a place keeper so that the three parameter version of
 		// exec can be used to specify the working directory.
@@ -84,8 +84,9 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 			testFormat( inputFile,  envVar, path);
 			
 			if(!acceptableFormat){
-				this.debugPrintln("- bAcceptableFormat: false");
-				reformatRecordToF16( inputFile,  path);
+				log.error("- bAcceptableFormat: false");
+				boolean reformat = reformatRecordToF16( inputFile,  path);
+				if (reformat) acceptableFormat=true;
 			}
 			
 			int folderLevel = path.split("/").length - 2 /* /opt/ */;
@@ -102,15 +103,15 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 			bRet = executeCommand(command, envVar, path);
 			
 			String stdReturn = stdReturnHandler();
-			debugPrintln(stdReturn);
+			log.info("stdReturn returned: " + stdReturn);
 			if(!stdReturn.contains("lead:")){
 				bRet=false;
-				this.debugPrintln("<ERROR>-- chesnokovV1() - sCommand:" + command);
+				log.error("<ERROR>-- chesnokovV1() - sCommand:" + command);
 				this.getAnalysisVO().setErrorMessage(this.getAnalysisVO().getErrorMessage() + "; " + stdReturn);
 			}
 			
 			boolean stdError = stdErrorHandler();
-			debugPrintln("stdError returned: " + stdError);
+			log.error("stdError returned: " + stdError);
 
 			String chesnokovCSVFilepath="";
 			if(bRet){
@@ -118,7 +119,7 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 				switch (this.getAnalysisVO().getResultType()) {
 				case CSV_FILE:
 				case ORIGINAL_FILE:
-					debugPrintln("calling chesnokovToCSV(chesnokovOutputFilename)");
+					log.info("calling chesnokovToCSV(chesnokovOutputFilename)");
 					chesnokovCSVFilepath = chesnokovToCSV(path + File.separator + chesnokovOutputFilenameXml, path + File.separator + inputFile, outputFile, path);
 					
 					File csvFile = new File(chesnokovCSVFilepath);
@@ -127,17 +128,18 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 						AnalysisUtils.deleteFile(path, chesnokovOutputFilenameXml);
 					
 						List<String> outputFilenames = new ArrayList<String>();
-						debugPrintln("- CSV Output Name: " + chesnokovCSVFilepath);
+						log.info("- CSV Output Name: " + chesnokovCSVFilepath);
 						outputFilenames.add(chesnokovCSVFilepath);
 						this.getAnalysisVO().setOutputFileNames(outputFilenames);
 					}else{
+						log.error("CSV file not found");
 						throw new AnalysisExecutionException("CSV file not found");
 					}
 					break;
 					
 				case JSON_DATA:
 					String jsonData = null;
-					debugPrintln("calling chesnokovToJSON(chesnokovOutputFilename)");
+					log.info("calling chesnokovToJSON(chesnokovOutputFilename)");
 					jsonData = chesnokovToJSON(path + File.separator + chesnokovOutputFilenameXml, path + File.separator + inputFile, outputFile, path);
 					
 					AnalysisUtils.deleteFile(path, chesnokovOutputFilenameXml);
@@ -148,9 +150,11 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 					break;
 				}
 			}else{
+				log.error("Command execution error. ["+ command+"]");
 				throw new AnalysisExecutionException("Command execution error. ["+ command+"]");
 			}
 		} catch (IOException e) {
+			log.error("Error on "+this.getAnalysisVO().getType()+" command output handling");
 			throw new AnalysisExecutionException("Error on "+this.getAnalysisVO().getType()+" command output handling", e);
 		}finally{
 			AnalysisUtils.deleteFile(path, "annotations.txt");
@@ -172,7 +176,7 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 			String recordName = inputFile.substring(0, inputFile.indexOf("."));
 			String command = "signame -r " + path + AnalysisUtils.sep + recordName;
 			boolean bNoException = executeCommand(command, envVar, AnalysisWrapper.WORKING_DIR);
-			this.debugPrintln("- bNoException:"+ bNoException);
+			log.info("- bNoException:"+ bNoException);
 			
 			String tempLine = "";
 			int lineNumber=0;
@@ -207,7 +211,7 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 			String recordName = inputFile.substring(0, inputFile.indexOf("."));
 			String command = "wfdbdesc " + path + AnalysisUtils.sep + recordName;
 			boolean bNoException = executeCommand(command, envVar, AnalysisWrapper.WORKING_DIR);
-			this.debugPrintln("- bNoException:"+ bNoException);
+			log.info("- bNoException:"+ bNoException);
 			
 			stdReturnMethodHandler();
 			this.stdErrorHandler();
@@ -224,21 +228,30 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 	@Override
 	protected void processReturnLine(String line) {
 		if(line.contains("Storage format: 16")){
-			this.debugPrintln("- found Format 16");
+			log.info("- found Format 16");
 			acceptableFormat=true;
 		}
 		if(line.contains("Storage format: 212")){
-			this.debugPrintln("- found Format 212");
+			log.info("- found Format 212");
 			acceptableFormat=true;
 		}
 	}
 	
-	private void reformatRecordToF16(String inputFile,  String path){
-		
-		ECGformatConverter con= new ECGformatConverter();
-		int signalsRequested = 0; // zero requests all signals found.
-		
-		con.convert(ECGformatConverter.fileFormat.WFDB, ECGformatConverter.fileFormat.WFDB_16, inputFile, signalsRequested, path, path);
+	private boolean reformatRecordToF16(String inputFile,  String path){
+		log.info("converting to WFDB format 16");
+		boolean success = true;
+		try{
+			ECGformatConverter con= new ECGformatConverter();
+			int signalsRequested = 0; // zero requests all signals found.
+			
+			int rowsWritten = con.convert(ECGformatConverter.fileFormat.WFDB, ECGformatConverter.fileFormat.WFDB_16, inputFile, signalsRequested, path, path);
+			log.info("Rows written in WFDB format 16:" + rowsWritten);
+			if (rowsWritten <= 0) success = false;
+		}catch(Exception e){
+			log.error("reformat failed: " + e.getMessage());
+			success = false;
+		}
+		return success;
 	}
 	
 	/** Converts the Chesnokov output file (XML) into a CSV format.

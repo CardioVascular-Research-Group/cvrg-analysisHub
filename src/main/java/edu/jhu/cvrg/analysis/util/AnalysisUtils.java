@@ -68,13 +68,17 @@ public class AnalysisUtils {
 	}
 	
 	public static void deleteFile(String inputPath, String inputFilename) {
+		log.info("deleteFile: " + inputPath + sep + inputFilename);
 		deleteFile(inputPath + sep + inputFilename);
 	}
 
 	public static void deleteFile(String fullPathFileName) {
+		log.info("deleteFile: " + fullPathFileName);
 		File targetFile = new File(fullPathFileName);
 		if(targetFile.exists()){
 			targetFile.delete();
+		}else{
+			log.error("targetFile does not exist.");
 		}
 	}
 

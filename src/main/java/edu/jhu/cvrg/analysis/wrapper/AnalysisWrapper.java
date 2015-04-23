@@ -67,8 +67,7 @@ public abstract class AnalysisWrapper {
 			log.error(errorMessage);
 			this.getAnalysisVO().setErrorMessage(errorMessage);
 			this.getAnalysisVO().setSucess(false);
-		}
-		
+		}		
 	}
 	
 	protected AnalysisVO getAnalysisVO() {

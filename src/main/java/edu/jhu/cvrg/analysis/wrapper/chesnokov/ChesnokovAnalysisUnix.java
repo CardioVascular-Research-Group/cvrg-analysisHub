@@ -65,11 +65,11 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 	@Override
 	protected void _execute() throws AnalysisExecutionException {
 		boolean bRet = true;
-		this.debugPrintln("---------------------------");
-		this.debugPrintln("chesnokov(), Linux version");
-		this.debugPrintln("- inputFile:" + inputFile);
-		this.debugPrintln("- path:" + path);
-		this.debugPrintln("- outputName:" + outputFile);
+		log.info("---------------------------");
+		log.info("chesnokov(), Linux version");
+		log.info("- inputFile:" + inputFile);
+		log.info("- path:" + path);
+		log.info("- outputName:" + outputFile);
 		// no environment variables are needed, 
 		// this is a place keeper so that the three parameter version of
 		// exec can be used to specify the working directory.
@@ -97,14 +97,14 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 //			String command = WINE_COMMAND + " " + folderUp + CHESNOKOV_COMMAND + " " + folderUp + CHESNOKOV_FILTERS + " " + inputFile + " " + chesnokovOutputFilenameXml; // add parameters for "input file" and "output file"
 			String command = "chesnokov " + " " + folderUp + CHESNOKOV_FILTERS + " " + inputFile + " " + chesnokovOutputFilenameXml; // add parameters for "input file" and "output file"
 
-			this.debugPrintln("- command:" + command);
+			log.info("- command:" + command);
 			bRet = executeCommand(command, envVar, path);
 			
 			String stdReturn = stdReturnHandler();
-			debugPrintln(stdReturn);
+			log.info("stdReturn: " + stdReturn);
 			if(!stdReturn.contains("lead:")){
 				bRet=false;
-				this.debugPrintln("<ERROR>-- chesnokovV1() - sCommand:" + command);
+				log.error("<ERROR>-- Chesnokov Unix - command:" + command);
 				this.getAnalysisVO().setErrorMessage(this.getAnalysisVO().getErrorMessage() + "; " + stdReturn);
 			}
 			

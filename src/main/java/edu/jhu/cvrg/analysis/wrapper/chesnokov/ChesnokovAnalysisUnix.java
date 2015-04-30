@@ -50,13 +50,13 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 	@Override
 	protected void _defineInputParameters() throws AnalysisParameterException {
 		
-		String sDatPathName = AnalysisUtils.findPathNameExt(this.getAnalysisVO().getFileNames(), "dat");
-		path = AnalysisUtils.extractPath(sDatPathName);
-		inputFile = AnalysisUtils.extractName(sDatPathName);
+		String sHeaderPathName = AnalysisUtils.findPathNameExt(this.getAnalysisVO().getFileNames(), "hea");
+		path = AnalysisUtils.extractPath(sHeaderPathName);
+		inputFile = AnalysisUtils.extractName(sHeaderPathName);
 		
-		log.info("physionetAnalysisService.PhysionetExecute - sDatName: " + inputFile);
-		log.info("physionetAnalysisService.PhysionetExecute - sDatPath: " + path);
-		log.info("physionetAnalysisService.PhysionetExecute - sDatPathName: " + sDatPathName);
+		log.info("physionetAnalysisService.ChesnokovAnalysisUnix - inputFile: " + inputFile);
+		log.info("physionetAnalysisService.ChesnokovAnalysisUnix - path: " + path);
+		log.info("physionetAnalysisService.ChesnokovAnalysisUnix - sHeaderPathName: " + sHeaderPathName);
 
 		int iIndexPeriod = inputFile.lastIndexOf(".");
 		outputFile = inputFile.substring(0, iIndexPeriod) + '_' + this.getAnalysisVO().getJobIdNumber();  // This will become the name of the CSV file
@@ -66,10 +66,13 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 	protected void _execute() throws AnalysisExecutionException {
 		boolean bRet = true;
 		log.info("---------------------------");
-		log.info("chesnokov(), Linux version");
-		log.info("- inputFile:" + inputFile);
-		log.info("- path:" + path);
-		log.info("- outputName:" + outputFile);
+		System.out.println("Chesnokov(), Linux version");
+		System.out.println("- inputFile:" + inputFile);
+		System.out.println("- path:" + path);
+		System.out.println("- outputName:" + outputFile);
+		String sHeaderPathName = AnalysisUtils.findPathNameExt(this.getAnalysisVO().getFileNames(), "hea");
+		System.out.println("- sHeaderPathName:" + sHeaderPathName);
+		
 		// no environment variables are needed, 
 		// this is a place keeper so that the three parameter version of
 		// exec can be used to specify the working directory.
@@ -93,9 +96,10 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 			
 			// execute Chesnokov analysis.
 			String chesnokovOutputFilenameXml = inputFile.substring(0, inputFile.lastIndexOf(".") + 1) + "xml";
+			System.out.println("- chesnokovOutputFilenameXml:" + chesnokovOutputFilenameXml);
 
 //			String command = WINE_COMMAND + " " + folderUp + CHESNOKOV_COMMAND + " " + folderUp + CHESNOKOV_FILTERS + " " + inputFile + " " + chesnokovOutputFilenameXml; // add parameters for "input file" and "output file"
-			String command = "chesnokov " + " " + folderUp + CHESNOKOV_FILTERS + " " + inputFile + " " + chesnokovOutputFilenameXml; // add parameters for "input file" and "output file"
+			String command = "/opt/autoqrs/Release/chesnokov /opt/autoqrs/Release/filters " + sHeaderPathName + " " + chesnokovOutputFilenameXml; // add parameters for "input file" and "output file"
 
 			log.info("- command:" + command);
 			bRet = executeCommand(command, envVar, path);
@@ -104,12 +108,12 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 			log.info("stdReturn: " + stdReturn);
 			if(!stdReturn.contains("lead:")){
 				bRet=false;
-				log.error("<ERROR>-- Chesnokov Unix - command:" + command);
+				log.error("Chesnokov Unix - command:" + command);
 				this.getAnalysisVO().setErrorMessage(this.getAnalysisVO().getErrorMessage() + "; " + stdReturn);
 			}
 			
 			boolean stdError = stdErrorHandler();
-			debugPrintln("stdError returned: " + stdError);
+			log.info("stdError returned: " + stdError);
 
 			String chesnokovCSVFilepath="";
 			if(bRet){

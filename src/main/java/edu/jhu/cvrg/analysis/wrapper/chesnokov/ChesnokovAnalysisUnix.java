@@ -99,7 +99,7 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 //			System.out.println("- chesnokovOutputFilenameXml:" + chesnokovOutputFilenameXml);
 
 //			String command = WINE_COMMAND + " " + folderUp + CHESNOKOV_COMMAND + " " + folderUp + CHESNOKOV_FILTERS + " " + inputFile + " " + chesnokovOutputFilenameXml; // add parameters for "input file" and "output file"
-			String command = "/opt/autoqrs/Release/chesnokov /opt/autoqrs/Release/filters " + sHeaderPathName + " " + chesnokovOutputFilenameXml + " verbose"; // add parameters for "input file" and "output file"
+			String command = "/opt/autoqrs/Release/chesnokov /opt/autoqrs/Release/filters " + sHeaderPathName + " " + chesnokovOutputFilenameXml ; // add parameters for "input file" and "output file"
 
 //			log.info("- command:" + command);
 			bRet = executeCommand(command, envVar, path);

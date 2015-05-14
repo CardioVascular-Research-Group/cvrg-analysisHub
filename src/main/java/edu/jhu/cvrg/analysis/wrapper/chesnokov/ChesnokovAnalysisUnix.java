@@ -95,11 +95,12 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 			}
 			
 			// execute Chesnokov analysis.
-			String chesnokovOutputFilenameXml = inputFile.substring(0, inputFile.lastIndexOf(".") + 1) + "xml";
+			
+			String outputPathNameXml = path + inputFile.substring(0, inputFile.lastIndexOf(".") + 1) + "xml";
 //			System.out.println("- chesnokovOutputFilenameXml:" + chesnokovOutputFilenameXml);
 
 //			String command = WINE_COMMAND + " " + folderUp + CHESNOKOV_COMMAND + " " + folderUp + CHESNOKOV_FILTERS + " " + inputFile + " " + chesnokovOutputFilenameXml; // add parameters for "input file" and "output file"
-			String command = "/opt/autoqrs/Release/chesnokov /opt/autoqrs/Release/filters " + sHeaderPathName + " " + chesnokovOutputFilenameXml ; // add parameters for "input file" and "output file"
+			String command = "/opt/autoqrs/Release/chesnokov /opt/autoqrs/Release/filters " + sHeaderPathName + " " + outputPathNameXml ; // add parameters for "input file" and "output file"
 
 //			log.info("- command:" + command);
 			bRet = executeCommand(command, envVar, path);
@@ -122,12 +123,12 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 				case CSV_FILE:
 				case ORIGINAL_FILE:
 					debugPrintln("calling chesnokovToCSV(chesnokovOutputFilename)");
-					chesnokovCSVFilepath = chesnokovToCSV(path + File.separator + chesnokovOutputFilenameXml, path + File.separator + inputFile, outputFile, path);
+					chesnokovCSVFilepath = chesnokovToCSV(path + File.separator + outputPathNameXml, path + File.separator + inputFile, outputFile, path);
 					
 					File csvFile = new File(chesnokovCSVFilepath);
 					bRet = csvFile.exists();
 					if(bRet){
-						AnalysisUtils.deleteFile(path, chesnokovOutputFilenameXml);
+						AnalysisUtils.deleteFile(path, outputPathNameXml);
 					
 						List<String> outputFilenames = new ArrayList<String>();
 						debugPrintln("- CSV Output Name: " + chesnokovCSVFilepath);
@@ -141,9 +142,9 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 				case JSON_DATA:
 					String jsonData = null;
 					debugPrintln("calling chesnokovToJSON(chesnokovOutputFilename)");
-					jsonData = chesnokovToJSON(path + File.separator + chesnokovOutputFilenameXml, path + File.separator + inputFile, outputFile, path);
+					jsonData = chesnokovToJSON(path + File.separator + outputPathNameXml, path + File.separator + inputFile, outputFile, path);
 					
-					AnalysisUtils.deleteFile(path, chesnokovOutputFilenameXml);
+					AnalysisUtils.deleteFile(path, outputPathNameXml);
 					
 					this.getAnalysisVO().setOutputData(jsonData);
 					this.getAnalysisVO().setOutputFileNames(null);

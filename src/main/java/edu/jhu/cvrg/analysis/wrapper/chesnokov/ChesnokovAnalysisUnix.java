@@ -106,15 +106,15 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 			bRet = executeCommand(command, envVar, path);
 			
 			String stdReturn = stdReturnHandler();
-//			log.info("stdReturn: " + stdReturn);
-			if(!stdReturn.contains("lead:")){
+			log.info("stdReturn: " + stdReturn);
+			if(!stdReturn.contains("chesnokov output finished")){
 				bRet=false;
 				log.error("Chesnokov Unix - command:" + command);
 				this.getAnalysisVO().setErrorMessage(this.getAnalysisVO().getErrorMessage() + "; " + stdReturn);
 			}
 			
 			boolean stdError = stdErrorHandler();
-//			log.info("stdError returned: " + stdError);
+			log.info("stdError returned: " + stdError);
 
 			String chesnokovCSVFilepath="";
 			if(bRet){
@@ -123,7 +123,8 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 				case CSV_FILE:
 				case ORIGINAL_FILE:
 					debugPrintln("calling chesnokovToCSV(chesnokovOutputFilename)");
-					chesnokovCSVFilepath = chesnokovToCSV(path + File.separator + outputPathNameXml, path + File.separator + inputFile, outputFile, path);
+//					chesnokovCSVFilepath = chesnokovToCSV(path + File.separator + outputPathNameXml, path + File.separator + inputFile, outputFile, path);
+					chesnokovCSVFilepath = chesnokovToCSV(outputPathNameXml, path + File.separator + inputFile, outputFile, path);
 					
 					File csvFile = new File(chesnokovCSVFilepath);
 					bRet = csvFile.exists();
@@ -152,7 +153,7 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 					break;
 				}
 			}else{
-				throw new AnalysisExecutionException("Command execution error. ["+ command+"]");
+				throw new AnalysisExecutionException("Command execution error. ["+ command+"]  stdReturn: " + stdReturn);
 			}
 		} catch (IOException e) {
 			throw new AnalysisExecutionException("Error on "+this.getAnalysisVO().getType()+" command output handling", e);

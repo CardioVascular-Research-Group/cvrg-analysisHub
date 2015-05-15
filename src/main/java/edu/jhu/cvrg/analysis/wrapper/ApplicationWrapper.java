@@ -33,9 +33,9 @@ public abstract class ApplicationWrapper extends AnalysisWrapper {
 			envVar = new String[0];
 		}
 		
-		debugPrintln("++ executeCommand(" + command + ")" );
-		debugPrintln(", asEnvVar[" + envVar.length + "]");
-		debugPrintln(", " + workingDir + ")");
+		log.info("++ executeCommand(" + command + ")" );
+		log.info(", asEnvVar[" + envVar.length + "]");
+		log.info(", " + workingDir + ")");
 		boolean bRet = true;	
 		
 		try {
@@ -75,7 +75,7 @@ public abstract class ApplicationWrapper extends AnalysisWrapper {
 			log.error("Exception Message: executeCommand(" + command + ")" + e.getMessage());
 			bRet = false;
 		}
-		debugPrintln("++ returning: " + bRet);
+		log.info("++ returning: " + bRet);
 		return bRet;
 	}
 	

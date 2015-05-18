@@ -32,15 +32,15 @@ import edu.jhu.icm.ecgFormatConverter.ECGformatConverter;
 
 public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 	
-	private static final String WINE_COMMAND = "wine";
-	private static final String CHESNOKOV_COMMAND = "autoqrs/Release/ecg.exe";
-	private static final String CHESNOKOV_FILTERS = "autoqrs/Release/filters/";
+//	private static final String WINE_COMMAND = "wine";
+	private static final String CHESNOKOV_COMMAND = "/opt/autoqrs/Release/chesnokov";
+	private static final String CHESNOKOV_FILTERS = "/opt/autoqrs/Release/filters";
 	
 	private String inputFile; 
 	private String path; 
 	private String outputFile;
 	
-	private boolean acceptableFormat=false;
+//	private boolean acceptableFormat=false;
 	private List<String> signalNameList;
 	
 	public ChesnokovAnalysisUnix(AnalysisVO vo) {
@@ -81,12 +81,12 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 		try{
 			
 			populateSignalNameList( inputFile,  envVar, path);
-			testFormat( inputFile,  envVar, path);
+//			testFormat( inputFile,  envVar, path);
 			
-			if(!acceptableFormat){
-				this.debugPrintln("- bAcceptableFormat: false");
-				reformatRecordToF16( inputFile,  path);
-			}
+//			if(!acceptableFormat){
+//				this.debugPrintln("- bAcceptableFormat: false");
+//				reformatRecordToF16( inputFile,  path);
+//			}
 			
 			int folderLevel = path.split("/").length - 2 /* /opt/ */;
 			String folderUp = "";
@@ -96,11 +96,12 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 			
 			// execute Chesnokov analysis.
 			
-			String outputPathNameXml = path + inputFile.substring(0, inputFile.lastIndexOf(".") + 1) + "xml";
+			String outputNameXml = path + inputFile.substring(0, inputFile.lastIndexOf(".") + 1) + "xml";
 //			System.out.println("- chesnokovOutputFilenameXml:" + chesnokovOutputFilenameXml);
 
 //			String command = WINE_COMMAND + " " + folderUp + CHESNOKOV_COMMAND + " " + folderUp + CHESNOKOV_FILTERS + " " + inputFile + " " + chesnokovOutputFilenameXml; // add parameters for "input file" and "output file"
-			String command = "/opt/autoqrs/Release/chesnokov /opt/autoqrs/Release/filters " + sHeaderPathName + " " + outputPathNameXml ; // add parameters for "input file" and "output file"
+//			String command = "/opt/autoqrs/Release/chesnokov /opt/autoqrs/Release/filters " + sHeaderPathName + " " + path + outputNameXml ; // add parameters for "input file" and "output file"
+			String command = CHESNOKOV_COMMAND + " " + CHESNOKOV_FILTERS + " " + sHeaderPathName + " " + path + outputNameXml ; // add parameters for "input file" and "output file"
 
 //			log.info("- command:" + command);
 			bRet = executeCommand(command, envVar, path);
@@ -123,13 +124,12 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 				case CSV_FILE:
 				case ORIGINAL_FILE:
 					debugPrintln("calling chesnokovToCSV(chesnokovOutputFilename)");
-//					chesnokovCSVFilepath = chesnokovToCSV(path + File.separator + outputPathNameXml, path + File.separator + inputFile, outputFile, path);
-					chesnokovCSVFilepath = chesnokovToCSV(outputPathNameXml, path + File.separator + inputFile, outputFile, path);
+					chesnokovCSVFilepath = chesnokovToCSV(path + File.separator + outputNameXml, path + File.separator + inputFile, outputFile, path);
 					
 					File csvFile = new File(chesnokovCSVFilepath);
 					bRet = csvFile.exists();
 					if(bRet){
-						AnalysisUtils.deleteFile(path, outputPathNameXml);
+						AnalysisUtils.deleteFile(path, outputNameXml);
 					
 						List<String> outputFilenames = new ArrayList<String>();
 						debugPrintln("- CSV Output Name: " + chesnokovCSVFilepath);
@@ -143,9 +143,9 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 				case JSON_DATA:
 					String jsonData = null;
 					debugPrintln("calling chesnokovToJSON(chesnokovOutputFilename)");
-					jsonData = chesnokovToJSON(path + File.separator + outputPathNameXml, path + File.separator + inputFile, outputFile, path);
+					jsonData = chesnokovToJSON(path + File.separator + outputNameXml, path + File.separator + inputFile, outputFile, path);
 					
-					AnalysisUtils.deleteFile(path, outputPathNameXml);
+					AnalysisUtils.deleteFile(path, outputNameXml);
 					
 					this.getAnalysisVO().setOutputData(jsonData);
 					this.getAnalysisVO().setOutputFileNames(null);
@@ -230,11 +230,11 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 	protected void processReturnLine(String line) {
 		if(line.contains("Storage format: 16")){
 			this.debugPrintln("- found Format 16");
-			acceptableFormat=true;
+//			acceptableFormat=true;
 		}
 		if(line.contains("Storage format: 212")){
 			this.debugPrintln("- found Format 212");
-			acceptableFormat=true;
+//			acceptableFormat=true;
 		}
 	}
 	

@@ -90,9 +90,9 @@ public abstract class ApplicationWrapper extends AnalysisWrapper {
 		lineNum = 0;
 		String tempLine;
 		
-	    debugPrintln("Here is the returned text of the command (if any):");
+	    log.info("Here is the returned text of the command (if any):");
 	    while ((tempLine = stdInputBuffer.readLine()) != null) {
-	    	debugPrintln(lineNum + ")" + tempLine);
+	    	log.info(lineNum + ")" + tempLine);
 	    	sb.append(tempLine);
 	    	lineNum++;
 	    }
@@ -105,9 +105,9 @@ public abstract class ApplicationWrapper extends AnalysisWrapper {
 		lineNum = 0;
 		String tempLine;
 		
-	    debugPrintln("Here is the returned text of the command (if any):");
+	    log.info("Here is the returned text of the command (if any):");
 	    while ((tempLine = stdInputBuffer.readLine()) != null) {
-	    	debugPrintln(lineNum + ")" + tempLine);
+	    	log.info(lineNum + ")" + tempLine);
 	    	this.processReturnLine(tempLine);
 	    	lineNum++;
 	    }
@@ -124,25 +124,25 @@ public abstract class ApplicationWrapper extends AnalysisWrapper {
 	    String line;
 		try{
 			// Create file 
-			debugPrintln("stdReturnHandler(FName) Creating output file: " + outputFilename);
+			log.info("stdReturnHandler(FName) Creating output file: " + outputFilename);
 			FileWriter fstream = new FileWriter(outputFilename);
 			BufferedWriter bwOut = new BufferedWriter(fstream);
 
 			lineNum = 0;
-		    debugPrintln("Here is the returned text of the command (if any): \"");
+		    log.info("Here is the returned text of the command (if any): \"");
 		    while ((line = stdInputBuffer.readLine()) != null) {
 		    	
 		    	bwOut.write(line);
 		    	bwOut.newLine();
 		    	if (lineNum<10){
-		    		debugPrintln(lineNum + ")" + line);
+		    		log.info(lineNum + ")" + line);
 		    	}
 		    	
 		    	lineNum++;
 		    }
-		    debugPrintln(". . . ");
-		    debugPrintln(lineNum + ")" + line);
-	        debugPrintln("\"");
+		    log.info(". . . ");
+		    log.info(lineNum + ")" + line);
+	        log.info("\"");
 			bwOut.flush();
 			//Close the output stream
 			bwOut.close();
@@ -162,12 +162,12 @@ public abstract class ApplicationWrapper extends AnalysisWrapper {
 	    String file = path + outputFilename + ".csv";
 		
 	    // Create file 
-		debugPrintln("stdReturnHandler(FName) Creating output file: " + file);
+		log.info("stdCSVReturnHandler(FName) Creating output file: " + file);
 		FileWriter fstream = new FileWriter(file);
 		BufferedWriter bwOut = new BufferedWriter(fstream);
 
 		lineNum = 0;
-	    debugPrintln("Here is the returned text of the command (if any): \"");
+	    log.info("Here is the returned text of the command (if any): \"");
 	    
 	    if(headers != null ){
 	    	String headerLine = "";
@@ -189,13 +189,13 @@ public abstract class ApplicationWrapper extends AnalysisWrapper {
 	    	bwOut.write(line);
 	    	bwOut.newLine();
 	    	if (lineNum<10){
-	    		debugPrintln(lineNum + ")" + line);
+	    		log.info(lineNum + ")" + line);
 	    	}
 	    	
 	    	lineNum++;
 	    }
-	    debugPrintln(lineNum + ")" + line);
-        debugPrintln("\"");
+	    log.info(lineNum + ")" + line);
+        log.info("\"");
 		bwOut.flush();
 		//Close the output stream
 		bwOut.close();
@@ -267,8 +267,8 @@ public abstract class ApplicationWrapper extends AnalysisWrapper {
 	    lineNum = 0;
 
 	    // read any errors from the attempted command
-	    debugPrintln("");
-	    debugPrintln("Here is the standard error of the command (if any): \"");
+	    log.info("");
+	    log.info("Here is the standard error of the command (if any): \"");
         while ((error = stdError.readLine()) != null) {
         	if(error.length() > 0){
         		
@@ -292,13 +292,13 @@ public abstract class ApplicationWrapper extends AnalysisWrapper {
 				
         	}
         }
-        debugPrintln("\"");
+        log.info("\"");
 		return bRet;
 
 	}
 	
 	protected void debugPrintln(String text){
-		log.debug("- ApplicationWrapper - " + text);
+		log.info("- ApplicationWrapper - " + text);
 	}
 
 	

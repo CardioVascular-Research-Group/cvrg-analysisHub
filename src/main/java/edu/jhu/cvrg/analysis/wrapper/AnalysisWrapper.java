@@ -6,18 +6,21 @@ import edu.jhu.cvrg.analysis.util.AnalysisParameterException;
 import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.vo.AnalysisType;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
+//import edu.jhu.cvrg.service.utilities.ServiceUtils;
 
 public abstract class AnalysisWrapper {
 	
 	private AnalysisVO analysisVO;
 	private String[] dataHeaders;
-	protected Logger log;
+//	protected Logger log;
+	protected static final Logger log = Logger.getLogger(AnalysisWrapper.class);
+
 	
 	protected static final String WORKING_DIR = "/";
 
 	public AnalysisWrapper(AnalysisVO vo) {
 		this.analysisVO = vo;
-		log = Logger.getLogger(this.getClass());
+//		log = Logger.getLogger(this.getClass());
 	}
 	
 	protected abstract void _defineInputParameters() throws AnalysisParameterException;

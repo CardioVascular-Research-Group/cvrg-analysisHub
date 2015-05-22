@@ -96,7 +96,7 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 			
 			// execute Chesnokov analysis.
 			
-			String outputNameXml = path + inputFile.substring(0, inputFile.lastIndexOf(".") + 1) + "xml";
+			String outputNameXml = inputFile.substring(0, inputFile.lastIndexOf(".") + 1) + "xml";
 //			System.out.println("- chesnokovOutputFilenameXml:" + chesnokovOutputFilenameXml);
 
 //			String command = WINE_COMMAND + " " + folderUp + CHESNOKOV_COMMAND + " " + folderUp + CHESNOKOV_FILTERS + " " + inputFile + " " + chesnokovOutputFilenameXml; // add parameters for "input file" and "output file"
@@ -107,11 +107,12 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 			bRet = executeCommand(command, envVar, path);
 			
 			String stdReturn = stdReturnHandler();
-			log.info("stdReturn: " + stdReturn);
-			if(!stdReturn.contains("chesnokov output finished")){
+			log.info("stdReturn: \"" + stdReturn + "\"");
+			if(!stdReturn.contains("success")){
 				bRet=false;
 				log.error("Chesnokov Unix - command:" + command);
 				this.getAnalysisVO().setErrorMessage(this.getAnalysisVO().getErrorMessage() + "; " + stdReturn);
+				throw new AnalysisExecutionException(this.getAnalysisVO().getErrorMessage() + "; " + stdReturn);
 			}
 			
 			boolean stdError = stdErrorHandler();
@@ -123,7 +124,7 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 				switch (this.getAnalysisVO().getResultType()) {
 				case CSV_FILE:
 				case ORIGINAL_FILE:
-					debugPrintln("calling chesnokovToCSV(chesnokovOutputFilename)");
+					log.info("calling chesnokovToCSV(chesnokovOutputFilename)");
 					chesnokovCSVFilepath = chesnokovToCSV(path + File.separator + outputNameXml, path + File.separator + inputFile, outputFile, path);
 					
 					File csvFile = new File(chesnokovCSVFilepath);
@@ -132,7 +133,7 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 						AnalysisUtils.deleteFile(path, outputNameXml);
 					
 						List<String> outputFilenames = new ArrayList<String>();
-						debugPrintln("- CSV Output Name: " + chesnokovCSVFilepath);
+						log.info("- CSV Output Name: " + chesnokovCSVFilepath);
 						outputFilenames.add(chesnokovCSVFilepath);
 						this.getAnalysisVO().setOutputFileNames(outputFilenames);
 					}else{
@@ -142,7 +143,7 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 					
 				case JSON_DATA:
 					String jsonData = null;
-					debugPrintln("calling chesnokovToJSON(chesnokovOutputFilename)");
+					log.info("calling chesnokovToJSON(chesnokovOutputFilename)");
 					jsonData = chesnokovToJSON(path + File.separator + outputNameXml, path + File.separator + inputFile, outputFile, path);
 					
 					AnalysisUtils.deleteFile(path, outputNameXml);
@@ -153,7 +154,7 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 					break;
 				}
 			}else{
-				throw new AnalysisExecutionException("Command execution error. ["+ command+"]  stdReturn: " + stdReturn);
+				throw new AnalysisExecutionException("chesnokov["+ inputFile+"] failed  stdRet: \"" + stdReturn + "\"");
 			}
 		} catch (IOException e) {
 			throw new AnalysisExecutionException("Error on "+this.getAnalysisVO().getType()+" command output handling", e);
@@ -177,14 +178,14 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 			String recordName = inputFile.substring(0, inputFile.indexOf("."));
 			String command = "signame -r " + path + AnalysisUtils.sep + recordName;
 			boolean bNoException = executeCommand(command, envVar, AnalysisWrapper.WORKING_DIR);
-			this.debugPrintln("- bNoException:"+ bNoException);
+//			log.info("- bNoException:"+ bNoException);
 			
 			String tempLine = "";
 			int lineNumber=0;
 			signalNameList = new ArrayList<String>();
 		    while ((tempLine = stdInputBuffer.readLine()) != null) {
 		    	if (lineNumber<12){
-		    		debugPrintln("signame(); " + lineNumber + ")" + tempLine);
+//		    		log.info("signame(); " + lineNumber + ")" + tempLine);
 		    	}
 		    	signalNameList.add(tempLine);
 		    	lineNumber++;
@@ -212,7 +213,7 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 			String recordName = inputFile.substring(0, inputFile.indexOf("."));
 			String command = "wfdbdesc " + path + AnalysisUtils.sep + recordName;
 			boolean bNoException = executeCommand(command, envVar, AnalysisWrapper.WORKING_DIR);
-			this.debugPrintln("- bNoException:"+ bNoException);
+//			log.info("- bNoException:"+ bNoException);
 			
 			stdReturnMethodHandler();
 			this.stdErrorHandler();
@@ -229,11 +230,11 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 	@Override
 	protected void processReturnLine(String line) {
 		if(line.contains("Storage format: 16")){
-			this.debugPrintln("- found Format 16");
+//			log.info("- found Format 16");
 //			acceptableFormat=true;
 		}
 		if(line.contains("Storage format: 212")){
-			this.debugPrintln("- found Format 212");
+//			log.info("- found Format 212");
 //			acceptableFormat=true;
 		}
 	}
@@ -258,13 +259,13 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 		
 		String xhtml = null;
         String csvOutputFilename = "";
-        debugPrintln(" ** converting to CSV " + chesnokovFilename);
+        log.info(" ** converting to CSV " + chesnokovFilename);
    		
 		xhtml = extractXmlData(chesnokovFilename, fileAnalyzedTempName, outputFileName);
 		
 		csvOutputFilename = outputPath + outputFileName + ".csv";
 		
-		debugPrintln(" ** writing " + csvOutputFilename);
+		log.info(" ** writing " + csvOutputFilename);
 		
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(csvOutputFilename));
@@ -315,12 +316,12 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 			xslTransformer = new XSLTransformer(xsltIS);
 			transformed = xslTransformer.transform(xmlDoc);
 			xhtml = getString(transformed);
-			debugPrintln(" ** xslTransformation completed using: " + xsltIS.toString());
+			log.info(" ** xslTransformation completed using: " + xsltIS.toString());
 			int startTruncPosition = xhtml.indexOf("<html>") + 6;
 			int endTruncPosition = xhtml.indexOf("</html>");
 			
 			xhtml = xhtml.substring(startTruncPosition, endTruncPosition);
-			debugPrintln(" ** replacing : " + fileAnalyzedTempName + " with: " + outputFileName);
+			log.info(" ** replacing : " + fileAnalyzedTempName + " with: " + outputFileName);
 			xhtml = xhtml.replaceAll(fileAnalyzedTempName, outputFileName);
 
 		} catch (FileNotFoundException e) {
@@ -339,7 +340,7 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 	
 	private String chesnokovToJSON(String chesnokovFilename, String fileAnalyzedTempName, String outputFileName, String outputPath) {
 		String xhtml = null;
-        debugPrintln(" ** converting to JSON " + chesnokovFilename);
+        log.info(" ** converting to JSON " + chesnokovFilename);
    		
 		xhtml = extractXmlData(chesnokovFilename, fileAnalyzedTempName, outputFileName);
 		xhtml = xhtml.replaceFirst("},]}", "}]}");

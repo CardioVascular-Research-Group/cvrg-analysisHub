@@ -12,15 +12,13 @@ public abstract class AnalysisWrapper {
 	
 	private AnalysisVO analysisVO;
 	private String[] dataHeaders;
-//	protected Logger log;
-	protected static final Logger log = Logger.getLogger(AnalysisWrapper.class);
-
+	protected Logger log;
 	
 	protected static final String WORKING_DIR = "/";
 
 	public AnalysisWrapper(AnalysisVO vo) {
 		this.analysisVO = vo;
-//		log = Logger.getLogger(this.getClass());
+		log = Logger.getLogger(this.getClass());
 	}
 	
 	protected abstract void _defineInputParameters() throws AnalysisParameterException;

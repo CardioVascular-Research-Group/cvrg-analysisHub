@@ -32,7 +32,7 @@ public abstract class AnnotationOutputAnalysisWrapper extends ApplicationWrapper
 	
 	public abstract String getAnnotationExt();
 	
-	protected void execute_rdann(String path, String headerFilename, AnalysisResultType format) throws AnalysisExecutionException{
+	protected void execute_rdann(String path, String headerFilename, AnalysisResultType format, boolean cleanupLater) throws AnalysisExecutionException{
 		
 		String[] asEnvVar = new String[0];   
 		int iIndexPeriod = headerFilename.lastIndexOf(".");
@@ -68,7 +68,9 @@ public abstract class AnnotationOutputAnalysisWrapper extends ApplicationWrapper
 		} catch (IOException e) {
 			throw new AnalysisExecutionException("Error on RDANN command output handling", e);
 		}finally{
-			AnalysisUtils.deleteFile(path+sRecord+'.'+this.getAnnotationExt());
+			if(!cleanupLater){
+				AnalysisUtils.deleteFile(path+sRecord+'.'+this.getAnnotationExt());
+			}
 		}
 	}
 	
@@ -90,6 +92,7 @@ public abstract class AnnotationOutputAnalysisWrapper extends ApplicationWrapper
 			
 			switch (resultType) {
 				case ORIGINAL_FILE:
+					this.execute_rdann(path, headerName, AnalysisResultType.JSON_DATA, true);
 					List<String> outputFilenames = new ArrayList<String>();
 					if(this.getAnalysisVO().isRename()){
 						String finalName = path + record + '_'+ this.getAnalysisVO().getJobIdNumber() + "." + this.getAnnotationExt() ;
@@ -103,7 +106,7 @@ public abstract class AnnotationOutputAnalysisWrapper extends ApplicationWrapper
 					break;
 				case CSV_FILE:
 				case JSON_DATA:
-					this.execute_rdann(path, headerName, this.getAnalysisVO().getResultType());
+					this.execute_rdann(path, headerName, this.getAnalysisVO().getResultType(), false);
 					break;
 				default:
 					throw new AnalysisExecutionException("Unexpected format ["+this.getAnalysisVO().getResultType()+"] for this analysis ["+this.getAnalysisVO().getType()+"]");

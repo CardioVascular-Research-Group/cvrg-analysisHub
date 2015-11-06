@@ -33,8 +33,8 @@ import edu.jhu.icm.ecgFormatConverter.ECGformatConverter;
 public class ChesnokovAnalysis extends ApplicationWrapper {
 	
 	private static final String WINE_COMMAND = "wine";
-	private static final String CHESNOKOV_COMMAND = "autoqrs/Release/ecg.exe";
-	private static final String CHESNOKOV_FILTERS = "autoqrs/Release/filters/";
+	private static final String CHESNOKOV_COMMAND = "opt/autoqrs/Release/ecg.exe";
+	private static final String CHESNOKOV_FILTERS = "opt/autoqrs/Release/filters/";
 	
 	private String inputFile; 
 	private String path; 
@@ -89,7 +89,7 @@ public class ChesnokovAnalysis extends ApplicationWrapper {
 				if (reformat) acceptableFormat=true;
 			}
 			
-			int folderLevel = path.split("/").length - 2 /* /opt/ */;
+			int folderLevel = path.split("/").length - 1 /* /opt/ */;
 			String folderUp = "";
 			for (int i = 0; i < folderLevel; i++) {
 				folderUp+="../";

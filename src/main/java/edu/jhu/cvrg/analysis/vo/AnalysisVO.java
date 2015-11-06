@@ -1,5 +1,6 @@
 package edu.jhu.cvrg.analysis.vo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,10 @@ public class AnalysisVO {
 
 	public List<String> getFileNames() {
 		return inputFileNames;
+	}
+	
+	public void setFileNames(List<String> fileNames) {
+		inputFileNames = fileNames;
 	}
 
 	public Map<String, Object> getCommandParamMap() {
@@ -127,5 +132,12 @@ public class AnalysisVO {
 
 	public void setRecordName(String recordName) {
 		this.recordName = recordName;
+	}
+	
+	public void addOutputFileName(String filename){
+		if(outputFileNames == null){
+			outputFileNames = new ArrayList<String>();
+		}
+		outputFileNames.add(filename);
 	}
 }

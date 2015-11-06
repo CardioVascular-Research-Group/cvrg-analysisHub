@@ -6,4 +6,12 @@ public enum AnalysisResultType {
 	CSV_FILE,
 	JSON_DATA;
 	
+	public static AnalysisResultType getType(String typeStr) {
+		for (AnalysisResultType t : AnalysisResultType.values()) {
+			if(typeStr.equals(t.name())){
+				return t;
+			}
+		}
+		return null;
+	}
 }

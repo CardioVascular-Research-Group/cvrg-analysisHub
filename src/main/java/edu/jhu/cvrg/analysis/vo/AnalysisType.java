@@ -33,7 +33,7 @@ public enum AnalysisType {
 	WQRS4PNNLIST("wqrs4pnnlist/pNNx", 	"wqrs4pnnlistWrapperType2",	PnnlistAnalysis.class, 			WqrsAnalysis.class),
 	WRSAMP("wrsamp", 					"wrsampWrapperType2", 		null, 							null), 
 	CHESNOKOV("QT Screening", 			"chesnokovWrapperType2", 	ChesnokovAnalysis.class,		null),
-	CHESNOKOVUNIX("QT Screening", 		"chesnokovWrapperUnixType2",ChesnokovAnalysisUnix.class,	null),
+	CHESNOKOVUNIX("QT Screening", 		"chesnokovunixWrapperType2",ChesnokovAnalysisUnix.class,	null),
 	QRS_SCORE("QRS_SCORE", 				"qrs_scoreWrapperType2", 	QrsScoreAnalysis.class,			null);
 	
 	private String name;

@@ -125,7 +125,7 @@ public class ChesnokovAnalysisUnix extends ApplicationWrapper {
 				case CSV_FILE:
 				case ORIGINAL_FILE:
 					log.info("calling chesnokovToCSV(chesnokovOutputFilename)");
-					chesnokovCSVFilepath = chesnokovToCSV(path + File.separator + outputNameXml, path + File.separator + inputFile, outputFile, path);
+					chesnokovCSVFilepath = chesnokovToCSV(path + outputNameXml, path + inputFile, outputFile, path);
 					
 					File csvFile = new File(chesnokovCSVFilepath);
 					bRet = csvFile.exists();

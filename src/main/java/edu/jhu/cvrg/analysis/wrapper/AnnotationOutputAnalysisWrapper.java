@@ -10,7 +10,12 @@ import edu.jhu.cvrg.analysis.util.AnalysisUtils;
 import edu.jhu.cvrg.analysis.vo.AnalysisResultType;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
 
-
+/**
+ * Base class for annotation output analysis. Applying the transformation annotations to output text on the desired format.  
+ * 
+ * @author avilard4
+ *
+ */
 public abstract class AnnotationOutputAnalysisWrapper extends ApplicationWrapper{
 
 	public AnnotationOutputAnalysisWrapper(AnalysisVO vo) {
@@ -32,6 +37,15 @@ public abstract class AnnotationOutputAnalysisWrapper extends ApplicationWrapper
 	
 	public abstract String getAnnotationExt();
 	
+	/**
+	 * Method to read the annotation file
+	 * 
+	 * @param path
+	 * @param headerFilename
+	 * @param format
+	 * @param cleanupLater
+	 * @throws AnalysisExecutionException
+	 */
 	protected void execute_rdann(String path, String headerFilename, AnalysisResultType format, boolean cleanupLater) throws AnalysisExecutionException{
 		
 		String[] asEnvVar = new String[0];   

@@ -7,6 +7,12 @@ import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.util.AnalysisUtils;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
 
+/**
+ * Base class for annotation dependent Analysis
+ *  
+ * @author avilard4
+ *
+ */
 public abstract class AnnotationBasedAnalysisWrapper extends ApplicationWrapper {
 
 	private AnnotationOutputAnalysisWrapper annotationBased = null;

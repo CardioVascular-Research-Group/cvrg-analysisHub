@@ -10,6 +10,11 @@ import java.io.InputStreamReader;
 
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
 
+/**
+ * Base class to analysis witch depends to shell command executions
+ * @author avilard4
+ *
+ */
 public abstract class ApplicationWrapper extends AnalysisWrapper {
 
 	protected BufferedReader stdInputBuffer = null;

@@ -6,8 +6,13 @@ import edu.jhu.cvrg.analysis.util.AnalysisParameterException;
 import edu.jhu.cvrg.analysis.util.AnalysisExecutionException;
 import edu.jhu.cvrg.analysis.vo.AnalysisType;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
-//import edu.jhu.cvrg.service.utilities.ServiceUtils;
 
+/**
+ * Analysis main class
+ * 
+ * @author avilard4
+ *
+ */
 public abstract class AnalysisWrapper {
 	
 	private AnalysisVO analysisVO;
@@ -21,8 +26,19 @@ public abstract class AnalysisWrapper {
 		log = Logger.getLogger(this.getClass());
 	}
 	
+	/**
+	 * Customized method to define individual input parameters implemented by each Analysis class
+	 * 
+	 * @throws AnalysisParameterException Invalid input parameters
+	 */
 	protected abstract void _defineInputParameters() throws AnalysisParameterException;
+	/**
+	 * Customized method to be implemented the Analysis logic to each class
+	 * 
+	 * @throws AnalysisExecutionException
+	 */
 	protected abstract void _execute() throws AnalysisExecutionException;
+	
 	
 	public void defineInputParameters() throws AnalysisParameterException{
 		
